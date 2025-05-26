@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ThemeManagerDialogBase</class>
+ <widget class="QDialog" name="ThemeManagerDialogBase">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>636</width>
+    <height>540</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Theme Manager</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3" rowstretch="0" columnstretch="0" rowminimumheight="0" columnminimumwidth="0">
+   <property name="leftMargin">
+    <number>5</number>
+   </property>
+   <property name="topMargin">
+    <number>5</number>
+   </property>
+   <property name="rightMargin">
+    <number>5</number>
+   </property>
+   <property name="bottomMargin">
+    <number>5</number>
+   </property>
+   <property name="spacing">
+    <number>5</number>
+   </property>
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="gridLayout_2" rowstretch="4,5,0">
+     <item row="0" column="0">
+      <widget class="QgsCollapsibleGroupBox" name="mGroupBox">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+       <layout class="QGridLayout" name="gridLayout" rowstretch="1,0" columnstretch="0" rowminimumheight="0,0" columnminimumwidth="0">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <property name="leftMargin">
+         <number>5</number>
+        </property>
+        <property name="topMargin">
+         <number>15</number>
+        </property>
+        <property name="rightMargin">
+         <number>5</number>
+        </property>
+        <property name="bottomMargin">
+         <number>5</number>
+        </property>
+        <property name="horizontalSpacing">
+         <number>6</number>
+        </property>
+        <property name="verticalSpacing">
+         <number>5</number>
+        </property>
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+          <item>
+           <widget class="QPlainTextEdit" name="textEditNameNewTheme">
+            <property name="plainText">
+             <string>Donner un nom à un nouveau thème</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnCreateNewTheme">
+            <property name="text">
+             <string>Créer</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QTableWidget" name="table_FilterAndSuppressThemes"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QSplitter" name="splitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QTableWidget" name="tableThemes">
+        <property name="tabletTracking">
+         <bool>false</bool>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+       </widget>
+       <widget class="QWidget" name="">
+        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,10,1">
+         <item>
+          <widget class="QLabel" name="label_SelectTheme">
+           <property name="text">
+            <string>Sélectionner un thème :</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboThemes"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnApplyTheme">
+           <property name="text">
+            <string>Appliquer le thème sélectionné</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,1">
+       <item>
+        <widget class="QPushButton" name="btnRefresh">
+         <property name="text">
+          <string>Actualiser la liste des éléments affichés</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDialogButtonBox" name="button_box">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="standardButtons">
+          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsCollapsibleGroupBox</class>
+   <extends>QGroupBox</extends>
+   <header>qgscollapsiblegroupbox.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>button_box</sender>
+   <signal>accepted()</signal>
+   <receiver>ThemeManagerDialogBase</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>button_box</sender>
+   <signal>rejected()</signal>
+   <receiver>ThemeManagerDialogBase</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
