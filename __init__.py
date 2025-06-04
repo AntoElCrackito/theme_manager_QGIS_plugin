@@ -8,7 +8,7 @@
                              -------------------
         begin                : 2025-05-22
         copyright            : (C) 2025 by Antoine BOYER
-        email                : @
+        email                : theme.manager.qgis.plugin@gmail.com
         git sha              : $Format:%H$
  ***************************************************************************/
 
