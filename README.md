@@ -38,3 +38,6 @@ Initialement, ce plugin a été développé durant un stage de fin d'étude au s
 1. Télécharger le dossier du plugin.
 2. S'il est sous format .zip, le dézipper.
 3. Déplacer le fichier obtenu dans : **DISQUE**:\Users\\**VOTRE_NOM_D_UTILISATEUR**\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\theme_manager
+
+## 📧 Contact :
+Sentez-vous libre de me contacter à ce mail : mailto(theme.manager.qgis.plugin@gmail.com) Au plaisir d'échanger avec vous !
