@@ -79,7 +79,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         self.tableThemes.clear()
         self.tableThemes.setRowCount(len(items) + 1)
         self.tableThemes.setColumnCount(len(themes) + 2)
-        self.tableThemes.setHorizontalHeaderLabels(["", "Groupe/Couche"] + themes)
+        self.tableThemes.setHorizontalHeaderLabels(["", self.tr("Groupe/Couche")] + themes)
         for col in [0, 1]:
             item = QtWidgets.QTableWidgetItem()
             item.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -94,13 +94,13 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             header_layout.setContentsMargins(0, 0, 0, 0)
             header_layout.setSpacing(2)
 
-            btn_select_all = QtWidgets.QPushButton("Tout sélectionner")
-            btn_select_all.setToolTip(f"Tout cocher pour le thème « {theme} »")
+            btn_select_all = QtWidgets.QPushButton(self.tr("Tout sélectionner"))
+            btn_select_all.setToolTip(self.tr("Tout cocher pour le thème « {theme} »").format(theme=theme))
             btn_select_all.clicked.connect(partial(self.select_all_column, col))
             header_layout.addWidget(btn_select_all)
 
-            btn_invert = QtWidgets.QPushButton("Inverser la sélection")
-            btn_invert.setToolTip(f"Inverser la sélection pour le thème « {theme} »")
+            btn_invert = QtWidgets.QPushButton(self.tr("Inverser la sélection"))
+            btn_invert.setToolTip(self.tr("Inverser la sélection pour le thème « {theme} »").format(theme=theme))
             btn_invert.clicked.connect(partial(self.invert_column, col))
             header_layout.addWidget(btn_invert)
 
@@ -119,13 +119,13 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             btn_layout.setContentsMargins(0, 0, 0, 0)
             btn_layout.setSpacing(2)
 
-            btn_select_all_row = QtWidgets.QPushButton("Tout sélectionner")
-            btn_select_all_row.setToolTip(f"Tout cocher pour « {name} »")
+            btn_select_all_row = QtWidgets.QPushButton(self.tr("Tout sélectionner"))
+            btn_select_all_row.setToolTip(self.tr("Tout cocher pour « {name} »").format(name=name))
             btn_select_all_row.clicked.connect(partial(self.select_all_row, row + 1))
             btn_layout.addWidget(btn_select_all_row)
 
-            btn_invert_row = QtWidgets.QPushButton("Inverser la sélection")
-            btn_invert_row.setToolTip(f"Inverser la sélection pour « {name} »")
+            btn_invert_row = QtWidgets.QPushButton(self.tr("Inverser la sélection"))
+            btn_invert_row.setToolTip(self.tr("Inverser la sélection pour « {name} »").format(name=name))
             btn_invert_row.clicked.connect(partial(self.invert_row, row + 1))
             btn_layout.addWidget(btn_invert_row)
 
@@ -155,7 +155,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                     checked = group_node.isVisible() if group_node else True
                     chk = QtWidgets.QCheckBox()
                     chk.setChecked(checked)
-                    chk.setToolTip("Active la visibilité du groupe dans l’arbre des couches (n’est pas stockée dans le thème QGIS, en effet, le thème QGIS ne contient pas d'informations sur les groupes)")
+                    chk.setToolTip(self.tr("Active la visibilité du groupe dans l’arbre des couches (n’est pas stockée dans le thème QGIS, en effet, le thème QGIS ne contient pas d'informations sur les groupes)"))
                     chk.is_group = is_group
                     chk.item_id = item_id
                     chk.theme = theme
@@ -247,7 +247,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         self.table_FilterAndSuppressThemes.blockSignals(True)
         self.table_FilterAndSuppressThemes.setRowCount(len(themes))
         self.table_FilterAndSuppressThemes.setColumnCount(4)  # 4 colonnes : afficher, nom, supprimer, renommer
-        self.table_FilterAndSuppressThemes.setHorizontalHeaderLabels(["Afficher", "Thème", "Supprimer", "Modifier le nom"])
+        self.table_FilterAndSuppressThemes.setHorizontalHeaderLabels([self.tr("Afficher"), self.tr("Thème"), self.tr("Supprimer"), self.tr("Modifier le nom")])
 
         for row, theme in enumerate(themes):
             # Colonne 0 : Base à cocher pour afficher/masquer le thème dans la table de gestion des couches par thème
@@ -260,12 +260,12 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             name_item.setFlags(QtCore.Qt.ItemIsEnabled)
             self.table_FilterAndSuppressThemes.setItem(row, 1, name_item)
             # Colonne 2 : Bouton de suppression du thème
-            btn = QtWidgets.QPushButton("Supprimer")
+            btn = QtWidgets.QPushButton(self.tr("Supprimer"))
             btn.clicked.connect(lambda checked, t=theme: self.delete_theme(t))
             self.table_FilterAndSuppressThemes.setCellWidget(row, 2, btn)
             # Colonne 3 : Bouton pour renommer le thème
-            btn_rename = QtWidgets.QPushButton("Modifier le nom du thème")
-            btn_rename.setToolTip("Renommer ce thème")
+            btn_rename = QtWidgets.QPushButton(self.tr("Modifier le nom du thème"))
+            btn_rename.setToolTip(self.tr("Renommer ce thème"))
             btn_rename.clicked.connect(lambda checked, t=theme, r=row: self.rename_theme_from_table(t, r))
             self.table_FilterAndSuppressThemes.setCellWidget(row, 3, btn_rename)
 
@@ -276,26 +276,25 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         # Renomme un thème déjà existant (procédure de vérification de doublons) et met à jour les tableaux pour y afficher le thème créé puis maffiche un message de confirmation
         theme_collection = QgsProject.instance().mapThemeCollection()
         # Demande un nouveau nom à l'utilisateur via une boîte de dialogue
-        new_name, ok = QtWidgets.QInputDialog.getText(self, "Renommer le thème",
-            f"Entrer un nouveau nom pour le thème « {old_name} » :", QtWidgets.QLineEdit.Normal, old_name)
+        new_name, ok = QtWidgets.QInputDialog.getText(self, self.tr("Renommer le thème"), self.tr("Entrer un nouveau nom pour le thème « {old_name} » :").format(old_name=old_name), QtWidgets.QLineEdit.Normal, old_name)
         if not ok or not new_name:
             return 
         new_name = new_name.strip()
         # Vérification du nom (vide, identique, doublon)
         if not new_name:
-            QtWidgets.QMessageBox.warning(self, "Nom manquant", "Veuillez saisir un nom de thème non vide.")
+            QtWidgets.QMessageBox.warning(self, self.tr("Nom manquant"), self.tr("Veuillez saisir un nom de thème non vide."))
             return
         if new_name == old_name:
-            QtWidgets.QMessageBox.information(self, "Renommer le thème", "Le nom n'a pas changé.")
+            QtWidgets.QMessageBox.information(self, self.tr("Renommer le thème"), self.tr("Le nom n'a pas changé."))
             return
         if new_name in theme_collection.mapThemes():
-            QtWidgets.QMessageBox.warning(self, "Thème existant", "Ce nom de thème existe déjà.")
+            QtWidgets.QMessageBox.warning(self, self.tr("Thème existant"), self.tr("Ce nom de thème existe déjà."))
             return
         # Applique la modification
         theme_collection.renameMapTheme(old_name, new_name)
         self.fill_theme_filter_table()
         self.fill_theme_table()
-        QtWidgets.QMessageBox.information(self, "Renommé", f"Le thème « {old_name} » a été renommé en « {new_name} ».")
+        QtWidgets.QMessageBox.information(self, self.tr("Renommé"), self.tr("Le thème « {old_name} » a été renommé en « {new_name} ».").format(old_name=old_name, new_name=new_name))
 
     def create_new_theme(self):
         # Ce nouveau thème se compose du canvas actuel de la carte
@@ -303,11 +302,11 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             return
         name = self.textEditNameNewTheme.toPlainText().strip()
         if not name:
-            QtWidgets.QMessageBox.warning(self, "Nom manquant", "Veuillez saisir un nom de thème.")
+            QtWidgets.QMessageBox.warning(self, self.tr("Nom manquant"), self.tr("Veuillez saisir un nom de thème non vide."))
             return
         theme_collection = QgsProject.instance().mapThemeCollection()
         if name in theme_collection.mapThemes():
-            QtWidgets.QMessageBox.warning(self, "Thème existant", "Ce nom de thème existe déjà.")
+            QtWidgets.QMessageBox.warning(self, self.tr("Thème existant"), self.tr("Ce nom de thème existe déjà."))
             return
         root = QgsProject.instance().layerTreeRoot()
         layerTreeModel = self.iface.layerTreeView().layerTreeModel()
@@ -324,8 +323,8 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         if theme_name not in theme_collection.mapThemes():
             return
         reply = QtWidgets.QMessageBox.question(
-            self, "Suppression de thème",
-            f"Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?",
+            self, self.tr("Suppression de thème"),
+            self.tr("Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?").format(theme_name=theme_name),
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if reply == QtWidgets.QMessageBox.Yes:
             theme_collection.removeMapTheme(theme_name)
@@ -344,7 +343,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                 return
             theme_collection = QgsProject.instance().mapThemeCollection()
             if new_name in theme_collection.mapThemes():
-                QtWidgets.QMessageBox.warning(self, "Thème existant", "Ce nom de thème existe déjà.")
+                QtWidgets.QMessageBox.warning(self, self.tr("Thème existant"), self.tr("Ce nom de thème existe déjà."))
                 item.setText(old_name)
                 return
             theme_collection.renameMapTheme(old_name, new_name)

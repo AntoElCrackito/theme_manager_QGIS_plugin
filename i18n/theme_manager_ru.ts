@@ -6,7 +6,7 @@
     <message>
         <location filename="../theme_manager.py" line="94"/>
         <source>&amp;Theme Manager</source>
-        <translation type="unfinished"></translation>
+        <translation>Theme Manager</translation>
     </message>
 </context>
 <context>
@@ -14,37 +14,140 @@
     <message>
         <location filename="../theme_manager_dialog_base.ui" line="14"/>
         <source>Theme Manager</source>
-        <translation type="unfinished"></translation>
+        <translation>Theme Manager</translation>
     </message>
     <message>
         <location filename="../theme_manager_dialog_base.ui" line="43"/>
         <source>Gestion des thèmes</source>
-        <translation type="Управление темами"></translation>
+        <translation>Управление темами</translation>
     </message>
     <message>
         <location filename="../theme_manager_dialog_base.ui" line="95"/>
         <source>Créer un thème</source>
-        <translation type="Создать тему"></translation>
+        <translation>Создать тему</translation>
     </message>
     <message>
         <location filename="../theme_manager_dialog_base.ui" line="104"/>
         <source>Filtrer l'affichage des thèmes dans le menu de gestion des couches par thème</source>
-        <translation type="Фильтровать отображение тем в меню управления слоями по выбранной теме"></translation>
+        <translation>Фильтровать отображение тем в меню управления слоями по выбранной теме</translation>
     </message>
     <message>
         <location filename="../theme_manager_dialog_base.ui" line="129"/>
         <source>Sélectionner un thème :</source>
-        <translation type="Выбрать тему :"></translation>
+        <translation>Выбрать тему :</translation>
     </message>
     <message>
         <location filename="../theme_manager_dialog_base.ui" line="139"/>
         <source>Appliquer le thème sélectionné</source>
-        <translation type="Применить выбранную тему"></translation>
+        <translation>Применить выбранную тему</translation>
     </message>
     <message>
         <location filename="../theme_manager_dialog_base.ui" line="150"/>
         <source>Gestion des couches et des groupes par thème</source>
-        <translation type="Управление слоями и группами по теме"></translation>
+        <translation>Управление слоями и группами по теме</translation>
+    </message>
+</context>
+<context>
+    <name>ThemeManagerDialog</name>
+    <message>
+        <source>Groupe/Couche</source>
+        <translation>Группа/Слой</translation>
+    </message>
+    <message>
+        <source>Tout sélectionner</source>
+        <translation>Выбрать все</translation>
+    </message>
+    <message>
+        <source>Tout cocher pour le thème « {theme} »</source>
+        <translation>Выбрать все для темы «{theme}»</translation>
+    </message>
+    <message>
+        <source>Inverser la sélection</source>
+        <translation>Инвертировать выбор</translation>
+    </message>
+    <message>
+        <source>Inverser la sélection pour le thème « {theme} »</source>
+        <translation>Инвертировать выбор для темы «{theme}»</translation>
+    </message>
+    <message>
+        <source>Tout cocher pour « {name} »</source>
+        <translation>Выбрать все для «{name}»</translation>
+    </message>
+    <message>
+        <source>Inverser la sélection pour « {name} »</source>
+        <translation>Инвертировать выбор для «{name}»</translation>
+    </message>
+    <message>
+        <source>Active la visibilité du groupe dans l’arbre des couches (n’est pas stockée dans le thème QGIS, en effet, le thème QGIS ne contient pas d'informations sur les groupes)</source>
+        <translation>Включить видимость группы в дереве слоёв (не хранится в теме QGIS, т.к. тема не содержит информации о группах)</translation>
+    </message>
+    <message>
+        <source>Afficher</source>
+        <translation>Показать</translation>
+    </message>
+    <message>
+        <source>Thème</source>
+        <translation>Тема</translation>
+    </message>
+    <message>
+        <source>Supprimer</source>
+        <translation>Удалить</translation>
+    </message>
+    <message>
+        <source>Modifier le nom</source>
+        <translation>Переименовать</translation>
+    </message>
+    <message>
+        <source>Modifier le nom du thème</source>
+        <translation>Переименовать тему</translation>
+    </message>
+    <message>
+        <source>Renommer ce thème</source>
+        <translation>Переименовать эту тему</translation>
+    </message>
+    <message>
+        <source>Nom manquant</source>
+        <translation>Отсутствует имя</translation>
+    </message>
+    <message>
+        <source>Veuillez saisir un nom de thème non vide.</source>
+        <translation>Пожалуйста, введите непустое имя темы.</translation>
+    </message>
+    <message>
+        <source>Renommer le thème</source>
+        <translation>Переименовать тему</translation>
+    </message>
+    <message>
+        <source>Entrer un nouveau nom pour le thème « {old_name} » :</source>
+        <translation>Введите новое имя для темы «{old_name}»:</translation>
+    </message>
+    <message>
+        <source>Le nom n'a pas changé.</source>
+        <translation>Имя не изменилось.</translation>
+    </message>
+    <message>
+        <source>Thème existant</source>
+        <translation>Существующая тема</translation>
+    </message>
+    <message>
+        <source>Ce nom de thème existe déjà.</source>
+        <translation>Такое имя темы уже существует.</translation>
+    </message>
+    <message>
+        <source>Renommé</source>
+        <translation>Переименовано</translation>
+    </message>
+    <message>
+        <source>Le thème « {old_name} » a été renommé en « {new_name} ».</source>
+        <translation>Тема «{old_name}» была переименована в «{new_name}».</translation>
+    </message>
+    <message>
+        <source>Suppression de thème</source>
+        <translation>Удаление темы</translation>
+    </message>
+    <message>
+        <source>Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?</source>
+        <translation>Вы уверены, что хотите удалить тему: «{theme_name}»?</translation>
     </message>
 </context>
 </TS>

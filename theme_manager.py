@@ -31,13 +31,23 @@ import os.path
 
 class ThemeManager:
     def __init__(self, iface):
+        from qgis.PyQt.QtCore import QTranslator, QCoreApplication, QSettings
+        import os
+
         self.iface = iface
         self.plugin_dir = os.path.dirname(__file__)
-        locale = QSettings().value('locale/userLocale')[0:2]
+
+        locale_full = QSettings().value('locale/userLocale')
+        if locale_full:
+            lang = locale_full.split('_')[0]
+        else:
+            lang = 'fr'
+
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'ThemeManager_{}.qm'.format(locale))
+            'theme_manager_{}.qm'.format(lang)
+        )
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
