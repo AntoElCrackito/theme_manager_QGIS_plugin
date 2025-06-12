@@ -17,6 +17,7 @@ import os
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets, QtCore
 from qgis.core import QgsProject, QgsMapThemeCollection
+from qgis.PyQt.QtGui import QColor
 
 # Charge le formulaire .ui généré dans QtDesigner (fichier d'interface graphique)
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -42,6 +43,17 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         # Remplissage des tableaux
         self.fill_theme_table()
         self.fill_theme_filter_table()
+        self.check_for_themes()
+
+    def check_for_themes(self):
+        theme_collection = QgsProject.instance().mapThemeCollection()
+        themes = list(theme_collection.mapThemes())
+        if not themes:
+            QtWidgets.QMessageBox.information(
+                self,
+                self.tr("Absence de thème dans le projet"),
+                self.tr("Votre projet ne contient pas de thème. Créez-en un depuis le menu QGIS ou dans le premier volet du plugin.")
+            )
 
     def fill_theme_table(self):
         # Pour le tableau principal, les lignes sont associées aux groupes et aux couches du projet, les colonnes sont associées aux thèmes activés par l'utilisateur (tous si aucun décochage)
@@ -113,23 +125,28 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # Remplit chaque ligne de la table (groupes/couches)
         for row, (is_group, item_id, name, parent_id) in enumerate(items):
-            # Boutons d'action ligne (tout sélectionner/inverser)
-            btn_widget = QtWidgets.QWidget()
-            btn_layout = QtWidgets.QVBoxLayout(btn_widget)
-            btn_layout.setContentsMargins(0, 0, 0, 0)
-            btn_layout.setSpacing(2)
+            if is_group:
+                group_item = QtWidgets.QTableWidgetItem()
+                group_item.setFlags(QtCore.Qt.NoItemFlags)
+                group_item.setBackground(QColor("#f0f0f0"))
+                self.tableThemes.setItem(row + 1, 0, group_item)
+            else:
+                btn_widget = QtWidgets.QWidget()
+                btn_layout = QtWidgets.QVBoxLayout(btn_widget)
+                btn_layout.setContentsMargins(0, 0, 0, 0)
+                btn_layout.setSpacing(2)
 
-            btn_select_all_row = QtWidgets.QPushButton(self.tr("Tout sélectionner"))
-            btn_select_all_row.setToolTip(self.tr("Tout cocher pour « {name} »").format(name=name))
-            btn_select_all_row.clicked.connect(partial(self.select_all_row, row + 1))
-            btn_layout.addWidget(btn_select_all_row)
+                btn_select_all_row = QtWidgets.QPushButton(self.tr("Tout sélectionner"))
+                btn_select_all_row.setToolTip(self.tr("Tout cocher pour « {name} »").format(name=name))
+                btn_select_all_row.clicked.connect(partial(self.select_all_row, row + 1))
+                btn_layout.addWidget(btn_select_all_row)
 
-            btn_invert_row = QtWidgets.QPushButton(self.tr("Inverser la sélection"))
-            btn_invert_row.setToolTip(self.tr("Inverser la sélection pour « {name} »").format(name=name))
-            btn_invert_row.clicked.connect(partial(self.invert_row, row + 1))
-            btn_layout.addWidget(btn_invert_row)
+                btn_invert_row = QtWidgets.QPushButton(self.tr("Inverser la sélection"))
+                btn_invert_row.setToolTip(self.tr("Inverser la sélection pour « {name} »").format(name=name))
+                btn_invert_row.clicked.connect(partial(self.invert_row, row + 1))
+                btn_layout.addWidget(btn_invert_row)
 
-            self.tableThemes.setCellWidget(row + 1, 0, btn_widget)
+                self.tableThemes.setCellWidget(row + 1, 0, btn_widget)
 
             # Si c'est un groupe le nom est en gras
             label = QtWidgets.QLabel(name)
@@ -140,89 +157,52 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             self.tableThemes.setCellWidget(row + 1, 1, label)
 
             # Ajoute une case à cocher pour chaque thème (couche/thème ou groupe/thème)
+
             for col, theme in enumerate(themes, start=2):
                 if is_group:
-                    # Trouve le groupe en fonction de son nom et de son emplacement dans l'arbre, les couches sont les enfants du groupe qui est le parent
-                    def find_group_by_name(node, name):
-                        for child in node.children():
-                            if child.nodeType() == child.NodeGroup and child.name() == name:
-                                return child
-                            res = find_group_by_name(child, name)
-                            if res:
-                                return res
-                        return None
-                    group_node = find_group_by_name(root, item_id)
-                    checked = group_node.isVisible() if group_node else True
-                    chk = QtWidgets.QCheckBox()
-                    chk.setChecked(checked)
-                    chk.setToolTip(self.tr("Active la visibilité du groupe dans l’arbre des couches (n’est pas stockée dans le thème QGIS, en effet, le thème QGIS ne contient pas d'informations sur les groupes)"))
-                    chk.is_group = is_group
-                    chk.item_id = item_id
-                    chk.theme = theme
-                    chk.stateChanged.connect(partial(self.on_box_changed, item_id, theme, is_group))
-                else:
-                    # Collecte les ID des couches contenues dans un thème
+                    group_item = QtWidgets.QTableWidgetItem()
+                    group_item.setFlags(QtCore.Qt.NoItemFlags)
+                    group_item.setBackground(QColor("#f0f0f0"))
+                    self.tableThemes.setItem(row + 1, col, group_item)
+                else: # Collecte les ID des couches contenues dans un thème
                     layers_in_theme = theme_collection.mapThemeVisibleLayerIds(theme)
                     checked = item_id in layers_in_theme
                     chk = QtWidgets.QCheckBox()
                     chk.setChecked(checked)
-                    chk.is_group = is_group
-                    chk.item_id = item_id
-                    chk.theme = theme
-                    chk.stateChanged.connect(partial(self.on_box_changed, item_id, theme, is_group))
+                    chk.stateChanged.connect(partial(self.on_box_changed, item_id, theme))
+                    widget = QtWidgets.QWidget()
+                    layout = QtWidgets.QHBoxLayout(widget)
+                    layout.addWidget(chk)
+                    layout.setAlignment(chk, QtCore.Qt.AlignCenter) # Checkbox au centre de la cellule
+                    layout.setContentsMargins(0, 0, 0, 0)
+                    widget.setLayout(layout)
+                    self.tableThemes.setCellWidget(row + 1, col, widget)
 
-                # Checkbox au centre de la cellule
-                widget = QtWidgets.QWidget()
-                layout = QtWidgets.QHBoxLayout(widget)
-                layout.addWidget(chk)
-                layout.setAlignment(chk, QtCore.Qt.AlignCenter)
-                layout.setContentsMargins(0, 0, 0, 0)
-                widget.setLayout(layout)
-                self.tableThemes.setCellWidget(row + 1, col, widget)
-        # Ajuste la taille des cellules en fonction du contenu
-        self.tableThemes.resizeColumnsToContents()
-        self.tableThemes.resizeRowsToContents()
-        self.tableThemes.resizeColumnsToContents()
-        self.tableThemes.resizeRowsToContents()
-        self.tableThemes.resizeColumnsToContents()
+                    # Ajuste la taille des cellules en fonction du contenu
+                    self.tableThemes.resizeColumnsToContents()
+                    self.tableThemes.resizeRowsToContents()
+                    self.tableThemes.resizeColumnsToContents()
+                    self.tableThemes.resizeRowsToContents()
+                    self.tableThemes.resizeColumnsToContents()
         
-    def on_box_changed(self, item_id, theme, is_group, state): # Lors d'une coche de case, la fonction met à jour l'état du thème, met à jjour la visibilité d'un groupe dans l'interface QGIS, rafraîchit la visibilité des groupes parents non cochés, applique le thème courant pour afficher les modifications
+    def on_box_changed(self, item_id, theme, state): # Lors d'une coche de case, la fonction met à jour l'état du thème, applique le thème courant pour afficher les modifications
         theme_collection = QgsProject.instance().mapThemeCollection()
         record = theme_collection.mapThemeState(theme)
         root = QgsProject.instance().layerTreeRoot()
-        if is_group:
-            # Recherche et met à jour la visibilité du groupe dans l'arbre des couches (CETTE FONCTION EST A REVOIR ELLE NE FONCTIONNE PAS COMME ATTENDUE)
-            def find_group_by_name(node, name):
-                for child in node.children():
-                    if child.nodeType() == child.NodeGroup and child.name() == name:
-                        return child
-                    res = find_group_by_name(child, name)
-                    if res:
-                        return res
-                return None
-            group_node = find_group_by_name(root, item_id)
-            if group_node:
-                group_node.setItemVisibilityChecked(state == QtCore.Qt.Checked)
-        else:
-            layer = QgsProject.instance().mapLayer(item_id)
-            if layer:
-                if state == QtCore.Qt.Checked:
-                    # Ajoute la couche comme étant visible dans le thème
-                    record.removeLayerRecord(layer)
-                    lr = QgsMapThemeCollection.MapThemeLayerRecord(layer)
-                    lr.isVisible = True
-                    record.addLayerRecord(lr)
-                else:
-                    # Sinon, retire la couche du thème
-                    record.removeLayerRecord(layer)
-                theme_collection.update(theme, record)
-                self.last_modified_theme = theme
+        layer = QgsProject.instance().mapLayer(item_id)
+        if layer:
+            if state == QtCore.Qt.Checked: # Ajoute la couche comme étant visible dans le thème
+                record.removeLayerRecord(layer)
+                lr = QgsMapThemeCollection.MapThemeLayerRecord(layer)
+                lr.isVisible = True
+                record.addLayerRecord(lr)
+            else: # Sinon, retire la couche du thème
+                record.removeLayerRecord(layer)
+            theme_collection.update(theme, record)
+            self.last_modified_theme = theme
 
-        # NE FONCTIONNE PAS COMME ATTENDUE ? -> Si une couche dans un groupe est cochée, le groupe doit s'afficher
-        self.check_group_if_layers_in_check()
-
-        # Applique le thème courant
-        if hasattr(self, "comboThemes"):
+        self.check_group_if_layers_in_check() # Après chaque clic sur une checkbox : Tenter de forcer l'affichage des groupes parents si sa couche enfant est visible (À revoir)
+        if hasattr(self, "comboThemes"): # Réappliques le thème courant pour que les changements soient visibles instantanéments
             current_theme = self.comboThemes.currentText()
             if current_theme:
                 theme_collection.applyTheme(current_theme, root, self.iface.layerTreeView().layerTreeModel())

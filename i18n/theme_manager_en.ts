@@ -50,6 +50,14 @@
 <context>
     <name>ThemeManagerDialog</name>
     <message>
+        <source>Absence de thème dans le projet</source>
+        <translation>No theme in the project</translation>
+    </message>
+    <message>
+        <source>Votre projet ne contient pas de thème. Créez-en un depuis le menu QGIS ou dans le premier volet du plugin.</source>
+        <translation>Your project does not contain any theme. Create one from the QGIS menu or in the first panel of the plugin.</translation>
+    </message>
+    <message>
         <source>Groupe/Couche</source>
         <translation>Group/Layer</translation>
     </message>
@@ -76,10 +84,6 @@
     <message>
         <source>Inverser la sélection pour « {name} »</source>
         <translation>Invert selection for “{name}”</translation>
-    </message>
-    <message>
-        <source>Active la visibilité du groupe dans l’arbre des couches (n’est pas stockée dans le thème QGIS, en effet, le thème QGIS ne contient pas d'informations sur les groupes)</source>
-        <translation>Enable group visibility in the layer tree (not stored in the QGIS theme, as it does not contain group information)</translation>
     </message>
     <message>
         <source>Afficher</source>

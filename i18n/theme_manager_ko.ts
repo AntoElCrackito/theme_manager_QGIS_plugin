@@ -50,6 +50,14 @@
 <context>
     <name>ThemeManagerDialog</name>
     <message>
+        <source>Absence de thème dans le projet</source>
+        <translation>프로젝트에 테마가 없습니다</translation>
+    </message>
+    <message>
+        <source>Votre projet ne contient pas de thème. Créez-en un depuis le menu QGIS ou dans le premier volet du plugin.</source>
+        <translation>프로젝트에 테마가 없습니다. QGIS 메뉴 또는 플러그인의 첫 번째 패널에서 테마를 생성하세요.</translation>
+    </message>    
+    <message>
         <source>Groupe/Couche</source>
         <translation>그룹/레이어</translation>
     </message>
@@ -76,10 +84,6 @@
     <message>
         <source>Inverser la sélection pour « {name} »</source>
         <translation>“{name}” 선택 반전</translation>
-    </message>
-    <message>
-        <source>Active la visibilité du groupe dans l’arbre des couches (n’est pas stockée dans le thème QGIS, en effet, le thème QGIS ne contient pas d'informations sur les groupes)</source>
-        <translation>레이어 트리에서 그룹 가시성 활성화(QGIS 테마에는 저장되지 않음, 테마에 그룹 정보 없음)</translation>
     </message>
     <message>
         <source>Afficher</source>

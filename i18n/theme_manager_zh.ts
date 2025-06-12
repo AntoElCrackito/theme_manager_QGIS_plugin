@@ -50,6 +50,14 @@
 <context>
     <name>ThemeManagerDialog</name>
     <message>
+        <source>Absence de thème dans le projet</source>
+        <translation>项目中没有主题</translation>
+    </message>
+    <message>
+        <source>Votre projet ne contient pas de thème. Créez-en un depuis le menu QGIS ou dans le premier volet du plugin.</source>
+        <translation>您的项目没有主题。请在 QGIS 菜单或插件的第一个面板中创建一个。</translation>
+    </message>    
+    <message>
         <source>Groupe/Couche</source>
         <translation>分组/图层</translation>
     </message>
@@ -76,10 +84,6 @@
     <message>
         <source>Inverser la sélection pour « {name} »</source>
         <translation>对“{name}”反选</translation>
-    </message>
-    <message>
-        <source>Active la visibilité du groupe dans l’arbre des couches (n’est pas stockée dans le thème QGIS, en effet, le thème QGIS ne contient pas d'informations sur les groupes)</source>
-        <translation>在图层树中启用组可见性（不会存储在 QGIS 主题中，因为主题不包含组信息）</translation>
     </message>
     <message>
         <source>Afficher</source>

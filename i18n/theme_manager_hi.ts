@@ -12,6 +12,14 @@
 <context>
     <name>ThemeManagerDialogBase</name>
     <message>
+        <source>Absence de thème dans le projet</source>
+        <translation>项目中没有主题</translation>
+    </message>
+    <message>
+        <source>Votre projet ne contient pas de thème. Créez-en un depuis le menu QGIS ou dans le premier volet du plugin.</source>
+        <translation>您的项目没有主题。请在 QGIS 菜单或插件的第一个面板中创建一个。</translation>
+    </message>
+    <message>
         <location filename="../theme_manager_dialog_base.ui" line="14"/>
         <source>Theme Manager</source>
         <translation>Theme Manager</translation>
@@ -76,10 +84,6 @@
     <message>
         <source>Inverser la sélection pour « {name} »</source>
         <translation>« {name} » के लिए चयन उलटें</translation>
-    </message>
-    <message>
-        <source>Active la visibilité du groupe dans l’arbre des couches (n’est pas stockée dans le thème QGIS, en effet, le thème QGIS ne contient pas d'informations sur les groupes)</source>
-        <translation>लेयर ट्री में समूह दृश्यता सक्षम करें (QGIS थीम में सहेजा नहीं जाता, क्योंकि इसमें समूहों की जानकारी नहीं होती)</translation>
     </message>
     <message>
         <source>Afficher</source>

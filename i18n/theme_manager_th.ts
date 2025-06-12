@@ -50,6 +50,14 @@
 <context>
     <name>ThemeManagerDialog</name>
     <message>
+        <source>Absence de thème dans le projet</source>
+        <translation>ไม่มีธีมในโปรเจ็กต์</translation>
+    </message>
+    <message>
+        <source>Votre projet ne contient pas de thème. Créez-en un depuis le menu QGIS ou dans le premier volet du plugin.</source>
+        <translation>โปรเจ็กต์ของคุณไม่มีธีม สร้างธีมได้จากเมนู QGIS หรือในแผงแรกของปลั๊กอิน</translation>
+    </message>   
+    <message>
         <source>Groupe/Couche</source>
         <translation>กลุ่ม/ชั้นข้อมูล</translation>
     </message>
@@ -76,10 +84,6 @@
     <message>
         <source>Inverser la sélection pour « {name} »</source>
         <translation>สลับการเลือกสำหรับ «{name}»</translation>
-    </message>
-    <message>
-        <source>Active la visibilité du groupe dans l’arbre des couches (n’est pas stockée dans le thème QGIS, en effet, le thème QGIS ne contient pas d'informations sur les groupes)</source>
-        <translation>เปิดการแสดงกลุ่มในแผนผังชั้นข้อมูล (ไม่ได้ถูกบันทึกในธีม QGIS เนื่องจากธีมไม่มีข้อมูลกลุ่ม)</translation>
     </message>
     <message>
         <source>Afficher</source>

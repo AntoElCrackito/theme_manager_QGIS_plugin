@@ -50,6 +50,14 @@
 <context>
     <name>ThemeManagerDialog</name>
     <message>
+        <source>Absence de thème dans le projet</source>
+        <translation>عدم وجود سمة في المشروع</translation>
+    </message>
+    <message>
+        <source>Votre projet ne contient pas de thème. Créez-en un depuis le menu QGIS ou dans le premier volet du plugin.</source>
+        <translation>لا يحتوي مشروعك على أي سمة. يمكنك إنشاء واحدة من قائمة QGIS أو من الجزء الأول في الإضافة.</translation>
+    </message>
+    <message>
         <source>Groupe/Couche</source>
         <translation>مجموعة/طبقة</translation>
     </message>
@@ -76,10 +84,6 @@
     <message>
         <source>Inverser la sélection pour « {name} »</source>
         <translation>عكس التحديد لـ « {name} »</translation>
-    </message>
-    <message>
-        <source>Active la visibilité du groupe dans l’arbre des couches (n’est pas stockée dans le thème QGIS, en effet, le thème QGIS ne contient pas d'informations sur les groupes)</source>
-        <translation>تفعيل ظهور المجموعة في شجرة الطبقات (غير محفوظ في النسق QGIS، حيث لا يحتوي النسق على معلومات عن المجموعات)</translation>
     </message>
     <message>
         <source>Afficher</source>
