@@ -153,5 +153,13 @@
         <source>Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?</source>
         <translation>您确定要删除主题：“{theme_name}”吗？</translation>
     </message>
+<message>
+    <source>Création d'un thème</source>
+    <translation>创建主题</translation>
+    </message>
+    <message>
+        <source>Veuillez saisir le nom du nouveau thème</source>
+        <translation>请输入新主题的名称</translation>
+    </message>
 </context>
 </TS>

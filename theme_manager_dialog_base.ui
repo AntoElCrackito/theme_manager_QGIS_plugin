@@ -33,7 +33,7 @@
     <number>5</number>
    </property>
    <item row="0" column="0">
-    <layout class="QGridLayout" name="gridLayout_2" rowstretch="4,0,0">
+    <layout class="QGridLayout" name="gridLayout_2" rowstretch="2,0,3">
      <item row="0" column="0">
       <widget class="QgsCollapsibleGroupBox" name="mGroupBox">
        <property name="focusPolicy">
@@ -48,7 +48,7 @@
        <property name="checkable">
         <bool>false</bool>
        </property>
-       <layout class="QGridLayout" name="gridLayout" rowstretch="1,0,0" columnstretch="0">
+       <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0" columnstretch="0,0">
         <property name="sizeConstraint">
          <enum>QLayout::SetDefaultConstraint</enum>
         </property>
@@ -71,32 +71,14 @@
          <number>5</number>
         </property>
         <item row="2" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QTableWidget" name="table_FilterAndSuppressThemes"/>
-          </item>
-         </layout>
+         <widget class="QTableWidget" name="table_FilterAndSuppressThemes"/>
         </item>
-        <item row="0" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
-          <item>
-           <widget class="QPlainTextEdit" name="textEditNameNewTheme">
-            <property name="toolTip">
-             <string/>
-            </property>
-            <property name="plainText">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnCreateNewTheme">
-            <property name="text">
-             <string>Créer un thème</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="btnCreateNewTheme">
+          <property name="text">
+           <string>Créer un thème</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="label_2">

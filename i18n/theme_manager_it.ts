@@ -153,5 +153,13 @@
         <source>Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?</source>
         <translation>Sei sicuro di voler eliminare il tema: «{theme_name}»?</translation>
     </message>
+    <message>
+        <source>Création d'un thème</source>
+        <translation>Creazione di un tema</translation>
+    </message>
+    <message>
+        <source>Veuillez saisir le nom du nouveau thème</source>
+        <translation>Inserisci il nome del nuovo tema</translation>
+    </message>
 </context>
 </TS>

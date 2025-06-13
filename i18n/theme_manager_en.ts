@@ -153,5 +153,13 @@
         <source>Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?</source>
         <translation>Are you sure you want to delete the theme: “{theme_name}”?</translation>
     </message>
+    <message>
+        <source>Création d'un thème</source>
+        <translation>Theme creation</translation>
+    </message>
+    <message>
+        <source>Veuillez saisir le nom du nouveau thème</source>
+        <translation>Please enter the name of the new theme</translation>
+    </message>
 </context>
 </TS>

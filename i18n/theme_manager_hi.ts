@@ -153,5 +153,13 @@
         <source>Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?</source>
         <translation>क्या आप वाकई थीम « {theme_name} » हटाना चाहते हैं?</translation>
     </message>
+    <message>
+        <source>Création d'un thème</source>
+        <translation>थीम बनाना</translation>
+    </message>
+    <message>
+        <source>Veuillez saisir le nom du nouveau thème</source>
+        <translation>कृपया नए थीम का नाम दर्ज करें</translation>
+    </message>
 </context>
 </TS>

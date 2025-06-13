@@ -153,5 +153,13 @@
         <source>Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?</source>
         <translation>هل أنت متأكد أنك تريد حذف النسق: « {theme_name} »؟</translation>
     </message>
+    <message>
+        <source>Création d'un thème</source>
+        <translation>إنشاء نسق</translation>
+    </message>
+    <message>
+        <source>Veuillez saisir le nom du nouveau thème</source>
+        <translation>يرجى إدخال اسم النسق الجديد</translation>
+    </message>
 </context>
 </TS>

@@ -153,5 +153,13 @@
         <source>Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?</source>
         <translation>本当にテーマ「{theme_name}」を削除しますか？</translation>
     </message>
+    <message>
+        <source>Création d'un thème</source>
+        <translation>テーマの作成</translation>
+    </message>
+    <message>
+        <source>Veuillez saisir le nom du nouveau thème</source>
+        <translation>新しいテーマの名前を入力してください</translation>
+    </message>
 </context>
 </TS>
