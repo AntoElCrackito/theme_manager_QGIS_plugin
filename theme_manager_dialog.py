@@ -69,7 +69,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         # Collects the themes list in the project from QGIS fonction
         theme_collection = QgsProject.instance().mapThemeCollection()
         # Les stocke sous forme de liste
-        # Stocks them as a list
+        # Stores them as a list
         themes = list(theme_collection.mapThemes())
         # S'il n'y a pas de thèmes dans le projet, une alerte est renvoyée
         # If there is no theme in the projet, an alert is displayed
@@ -86,18 +86,18 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         # Collects the theme collection in the projet
         theme_collection = QgsProject.instance().mapThemeCollection()
         # Les stocke sous forme de liste nommée all_themes
-        # Stocks them as a list named all_themes
+        # Stores them as a list named all_themes
         all_themes = list(theme_collection.mapThemes())
         """
         Sélection des thèmes à afficher en colonne
         Selects displayed themes in column
         """
         # Récupère la liste des thèmes à afficher selon le filtre appliqué par l'utilisateur
-        # If the table that filters themes exiss, it colects the list of themes that are checked
+        # If the table that filters themes exists, it collects the list of themes that are checked
         if hasattr(self, "table_FilterAndSuppressThemes"):
             selected_themes = []
             # La liste commence à la ligne 1 car car la ligne d'indice 0 contient les boutons d'actions
-            # The list begins at the line 1 because the line 0 countains the buttons
+            # The list begins at line 1 because line 0 contains the buttons
             for row in range(1, self.table_FilterAndSuppressThemes.rowCount()):
                 item = self.table_FilterAndSuppressThemes.item(row, 0)
                 # Si la case est cochée, le thème est ajouté à la liste
@@ -106,12 +106,12 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                     selected_themes.append(self.table_FilterAndSuppressThemes.item(row, 1).text())
             themes = selected_themes if selected_themes else all_themes
         # Si le tableau de filtre ne pouvait pas être chargée, tous les thèmes sont affichés
-        # If the table was'nt loaded, all themes would be displayed
+        # If the table wasn't loaded, all themes are displayed
         else:
             themes = all_themes
 
         # Liste tous les groupes et couches de l'arbre des couches QGIS
-        # Creation of a list which countains groups and layers of the QGIS layer tree
+        # Creation of a list which contains groups and layers of the QGIS layer tree
         items = []
         def add_items_rec(node, parent_id=None):
             # Parcourt l'arbre des couches, ajoute chaque groupe/couche à la liste items, parent_id permet de connaître la hiérarchie dans l'arbre des couches
@@ -119,7 +119,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             for child in node.children():
                 if child.nodeType() == child.NodeGroup:
                     # Si la condition est True, c'est un groupe : son id, son nom et l'id du parent (sous-groupe) sont récupérés
-                    # If the condition is True, the item is a group : it's id, name and the id of the parent (sub-group) are collected
+                    # If the condition is True, the item is a group : its id, name and the id of the parent (sub-group) are collected
                     group_id = child.name()
                     items.append((True, group_id, child.name(), parent_id))
                     add_items_rec(child, group_id)
@@ -127,22 +127,22 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                     # Recursive if it's a sub-group
                 elif child.nodeType() == child.NodeLayer:
                     # False = c'est une couche : récupération de son id, son nom et son parent (groupe/sous-groupe)
-                    # False = it's a layer : It's id, name and parent are collected (group/sub-group)
+                    # False = it's a layer : Its id, name and parent are collected (group/sub-group)
                     items.append((False, child.layerId(), child.name(), parent_id))
         root = QgsProject.instance().layerTreeRoot()
         add_items_rec(root)
 
         # Prépare le tableau (en-têtes, lignes, colonnes)
         # Initialise the table (header, row, column)
-        self.tableThemes.clear() # Remise à 0 du tableau / Erase former configuration of the table
+        self.tableThemes.clear() # Remise à 0 du tableau / Erases former configuration of the table
         # Réserve une ligne pour les boutons d'action sur les colonnes
-        # Allowing one row for the action buttons on columns
+        # Allocates one row for the column action buttons
         self.tableThemes.setRowCount(len(items) + 1)
         # La première colonne accueille les boutons d'action sur les lignes, la seconde les noms et ensuite n colonne pour n thème
         # The first column prints the action buttons on the lines, the second one the themes names and then n column for n theme
         self.tableThemes.setColumnCount(len(themes) + 2)
         # Nommage des colonnes (la première colonne n'a pas d'en-tête car elle contient les boutons d'action)
-        # Naming the columns (the first one is empty because it's the buttons columns)
+        # Naming columns (the first one is empty because it's the buttons columns)
         self.tableThemes.setHorizontalHeaderLabels(["", self.tr("Groupe/Couche")] + themes)
         for col in [0, 1]:
             item = QtWidgets.QTableWidgetItem()
@@ -197,7 +197,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                 self.tableThemes.setItem(row + 1, 0, group_item)
             else:
             # Si ce n'est pas un groupe, c'est une couche, elles sont ajoutée et des cases à cocher sont mises en place
-            # If it's not a group then it's a layer, they are added to the table and checkboxes are settled
+            # If it's not a group then it's a layer, it is added to the table and checkboxes are set
                 btn_widget = QtWidgets.QWidget()
                 btn_layout = QtWidgets.QVBoxLayout(btn_widget)
                 btn_layout.setContentsMargins(0, 0, 0, 0)
@@ -215,7 +215,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                 self.tableThemes.setCellWidget(row + 1, 0, btn_widget)
 
             # Si c'est un groupe le nom est en gras
-            # If it's a group the name is bold
+            # If it's a group in bold
             label = QtWidgets.QLabel(name)
             if is_group:
                 font = label.font()
@@ -246,14 +246,14 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                     widget = QtWidgets.QWidget()
                     layout = QtWidgets.QHBoxLayout(widget)
                     layout.addWidget(chk)
-                    layout.setAlignment(chk, QtCore.Qt.AlignCenter) # Checkbox au centre de la cellule
+                    layout.setAlignment(chk, QtCore.Qt.AlignCenter) # Case à cocher au centre de la cellule / Checkbox centered in the cell 
                     layout.setContentsMargins(0, 0, 0, 0)
                     widget.setLayout(layout)
                     self.tableThemes.setCellWidget(row + 1, col, widget)
         
         """
         Redimensionne les lignes et les colonnes en fonction du contenu
-        Resizes the rows and columns to fit to the content
+        Resizes the rows and columns to fit to content
         """
         self.tableThemes.resizeColumnsToContents()
         self.tableThemes.resizeRowsToContents()
@@ -286,7 +286,6 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             # Keeps the last modified theme in mind
             self.last_modified_theme = theme
 
-        self.check_group_if_layers_in_check() # Après chaque clic sur une checkbox : Tenter de forcer l'affichage des groupes parents si sa couche enfant est visible (À revoir) / Is a layer in a group is checked, it tries to check te group too (Seems not working)
         if hasattr(self, "comboThemes"): # Le thème dans la combobox des thèmes est rechargé / The theme chosen in the comboxbox is reloaded
             current_theme = self.comboThemes.currentText()
             if current_theme:
@@ -306,11 +305,10 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             root = QgsProject.instance().layerTreeRoot()
             layerTreeModel = self.iface.layerTreeView().layerTreeModel()
             theme_collection.applyTheme(selected_theme, root, layerTreeModel)
-            self.check_group_if_layers_in_check() # Cette ligne ne fonctionne probablement pas / this line seems not working to as line 289
 
     """
     Remplit le tableau de gestion des thèmes. Une ligne = Un thème, associé à ses boutons de sélection et de modification
-    Fills the managing theme table. One row = One theme, associated to it's selection and modification buttons
+    Fills the managing theme table. One row = One theme, associated to its selection and modification buttons
     """
     def fill_theme_filter_table(self):
         # Remplit la table de gestion des thèmes (affichage dans la table de gestion des couches, suppression, renommage), une ligne = un thème
@@ -371,91 +369,144 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             self.table_FilterAndSuppressThemes.setCellWidget(row+ 1, 3, btn_rename)
 
         # Redimensionne les tailles des colonnes (pas des lignes sinon les boutons sont trop gros)
-        # resizes the size of columns (not rows because the buttons are displayed too big)
+        # Resizes the columns (not rows, because the buttons were displayed too large)
         self.table_FilterAndSuppressThemes.resizeColumnsToContents()
         self.table_FilterAndSuppressThemes.blockSignals(False)
-######################################################################################################
+
+    """
+    Permet à l'utilisateur de renommer un thème grâce à une boîte de dialogue. Vérifie les doublons ou les valeurs nulles et applique le changement. Affiche un message de confirmation et met à jour les tableaux.
+    Allows the user to rename a theme thanks to a dialog box. Checks duplicated values or NULL ones and then rename the theme. Prints a confirmation message and reload the tables.
+    """
     def rename_theme_from_table(self, old_name, row):
-        # Renomme un thème déjà existant (procédure de vérification de doublons) et met à jour les tableaux pour y afficher le thème créé puis maffiche un message de confirmation
         theme_collection = QgsProject.instance().mapThemeCollection()
         # Demande un nouveau nom à l'utilisateur via une boîte de dialogue
+        # Asks the user to enter a new theme name (the former one is displayed in the question)
         new_name, ok = QtWidgets.QInputDialog.getText(self, self.tr("Renommer le thème"), self.tr("Entrer un nouveau nom pour le thème « {old_name} » :").format(old_name=old_name), QtWidgets.QLineEdit.Normal, old_name)
+        # Si l'utilisateur quitte la fenêtre ou entre une valeur nulle la fonction est fermée (Aucune action réalisée)
+        # If the user leaves the dialog box or sets a NULL value, the fonction is stopped (No action)
         if not ok or not new_name:
             return 
         new_name = new_name.strip()
-        # Vérification du nom (vide, identique, doublon)
-        if not new_name:
+        # Vérification du nom (vide, existant, doublon) :
+        # New name verifications (null, existing or duplicate value) :
+        if not new_name: # NULL
             QtWidgets.QMessageBox.warning(self, self.tr("Nom manquant"), self.tr("Veuillez saisir un nom de thème non vide."))
             return
-        if new_name == old_name:
+        if new_name == old_name: # Nom identique à l'ancien / Same name as the older one
             QtWidgets.QMessageBox.information(self, self.tr("Renommer le thème"), self.tr("Le nom n'a pas changé."))
             return
-        if new_name in theme_collection.mapThemes():
+        if new_name in theme_collection.mapThemes(): # Identique à un autre thème / Same as another theme
             QtWidgets.QMessageBox.warning(self, self.tr("Thème existant"), self.tr("Ce nom de thème existe déjà."))
             return
-        # Applique la modification
+        # Si tout est correct, applique le nouveau nom
+        # If the new name has passed every tests, it is applyed
         theme_collection.renameMapTheme(old_name, new_name)
         self.fill_theme_filter_table()
         self.fill_theme_table()
         QtWidgets.QMessageBox.information(self, self.tr("Renommé"), self.tr("Le thème « {old_name} » a été renommé en « {new_name} ».").format(old_name=old_name, new_name=new_name))
 
+    """
+    Permet à l'utilisateur de créer un thème grâce à une boîte de dialogue. Vérifie les doublons ou les valeurs nulles et applique le changement. Affiches un message de confirmation et met à jour les tableaux.
+    Allows the user to create a theme thanks to a dialog box. Checks duplicated values or NULL ones and then rename the theme. Prints a confirmation message and reload the tables. 
+    """
     def create_new_theme(self):
-        # Demande le nom du nouveau thème à l'utilisateur via une boîte de dialogue
+        # Demande un nouveau nom à l'utilisateur via une boîte de dialogue
+        # Asks the user to enter a new theme name (the former one is displayed in the question)
         name, ok = QtWidgets.QInputDialog.getText(self, self.tr("Création d'un thème"), self.tr("Veuillez saisir le nom du nouveau thème").strip())
+        # Si l'utilisateur quitte la fenêtre ou entre une valeur nulle la fonction est fermée (Aucune action réalisée)
+        # If the user leaves the dialog box or sets a NULL value, the fonction is stopped (No action)
         if not ok or not name.strip():
             return
         name = name.strip()
         theme_collection = QgsProject.instance().mapThemeCollection()
-        if name in theme_collection.mapThemes():
+        if name in theme_collection.mapThemes(): # Identique à un autre thème / Same as another theme
             QtWidgets.QMessageBox.warning(self, self.tr("Thème existant"), self.tr("Ce nom de thème existe déjà."))
             return
+        # Le thème est créé à partir de l'état actuel de l'arbre des couches
+        # The new theme is created from the current state of the layer tree
         root = QgsProject.instance().layerTreeRoot()
         layerTreeModel = self.iface.layerTreeView().layerTreeModel()
         theme_state = QgsMapThemeCollection.createThemeFromCurrentState(root, layerTreeModel)
         theme_collection.insert(name, theme_state)
+        # Recharge les tableaux pour afficher le nouveau thème
+        # Reloads the tables to display the new theme
         self.fill_theme_filter_table()
         self.fill_theme_table()
 
+    """
+    Supprimes un theme du projet
+    Removes a theme from the project
+    """
     def delete_theme(self, theme_name):
-        # Supprime un thème du projet après avoir demandé confirmation et rafraîchit les tableaux
         theme_collection = QgsProject.instance().mapThemeCollection()
+        # Si le thème n'est pas présent dans le projet la fonction est fermée
+        # If the theme isn't in the project the functon is cancelled
         if theme_name not in theme_collection.mapThemes():
             return
+        # Boîte de dialogue
+        # Dialog box
         reply = QtWidgets.QMessageBox.question(
             self, self.tr("Suppression de thème"),
             self.tr("Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?").format(theme_name=theme_name),
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        # Si l'utilisateur confirme son choix, le theme est supprimé
+        # If the user confirms, the theme is removed
         if reply == QtWidgets.QMessageBox.Yes:
             theme_collection.removeMapTheme(theme_name)
+            # Recharge les tableaux pour afficher le nouveau thème
+            # Reloads the tables to display the new theme
             self.fill_theme_filter_table()
             self.fill_theme_table()
 
+    """
+    Gestion de l'affichage dans la table de gestion des thèmes : Filtrage des thèmes à afficher, modification d'un thème
+    Manages the display in theme management table : filtering the themes to display, modifying a theme
+    """
     def on_filter_changed(self, item):
-        # Si le thème est décoché, il est masqué du second tableau, gère la modification d'un nom de thème
+        # Si la modification affecte la colonne 0 (filtre d'affichage des thèmes)
+        # If the edit concerns column 0 (theme display filter)
         if item.column() == 0:
+            # Le tableau est rechargé pour appliquer le filtre
+            # The table is reloaded to apply the user's choices
             self.fill_theme_table()
+        # Si la modificaiton affecte la colonne 1 (nom du thème)
+        # If the edit concerns column 1 (theme name)
         elif item.column() == 1:
             row = item.row()
             old_name = self._get_theme_name_by_row(row)
             new_name = item.text().strip()
+            # Si le nom ne change pas, on ignore la modification
+            # If the name does not change, the modification is ignored
             if not new_name or new_name == old_name:
                 return
             theme_collection = QgsProject.instance().mapThemeCollection()
+            # Si le nom existe déjà, affiche un avertissement
+            # If the name already exists, displayed a warn
             if new_name in theme_collection.mapThemes():
                 QtWidgets.QMessageBox.warning(self, self.tr("Thème existant"), self.tr("Ce nom de thème existe déjà."))
                 item.setText(old_name)
                 return
             theme_collection.renameMapTheme(old_name, new_name)
+            # Recharge les tableaux pour afficher le nouveau thème
+            # Reloads the tables to display the new theme
             self.fill_theme_filter_table()
             self.fill_theme_table()
 
+    """
+    Récupère le nom du thème associé au numéro de ligne du tableau
+    Gets the name of the theme and its row position in the table
+    """
     def _get_theme_name_by_row(self, row):
-        # Récupères le nom d'un thème en fonction de son placement sur la ligne de la table de gestion des thèmes
         item = self.table_FilterAndSuppressThemes.item(row, 1)
         return item.text() if item else ""
 
+    """
+    Coche toutes les cases à cocher de la ligne dans le tableau de gestion des couches par thèmes (Bouton 'Tout sélectionner')
+    Checks all checkboxes of the row in the table for managing layers by themes ('Select All' button)
+    """
     def select_all_row(self, row):
-        # Fonctionnement du bouton de sélection de toutes les lignes
+        # Trouves l'emplacement de la case à cocher et si elle n'est pas cochée, elle le devient
+        # Find the location of the checkboxes and if it is not checked, it becomes checked
         for col in range(2, self.tableThemes.columnCount()):
             cell_widget = self.tableThemes.cellWidget(row, col)
             if cell_widget:
@@ -463,8 +514,11 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                 if chk and not chk.isChecked():
                     chk.setChecked(True)
 
+    """
+    Inverse l'état des cases à cocher pour une ligne dans le tableau tableThemes (Bouton 'Inverser la sélection')
+    Reverses the state of the checkboxes for a row in the tableThemes table ('Invert selection' button)
+    """
     def invert_row(self, row):
-        # Fonctionnement du bouton d'inversion de la sélection pour une ligne
         for col in range(2, self.tableThemes.columnCount()):
             cell_widget = self.tableThemes.cellWidget(row, col)
             if cell_widget:
@@ -472,8 +526,11 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                 if chk:
                     chk.setChecked(not chk.isChecked())
 
+    """
+    # Trouves l'emplacement de la case à cocher et si elle n'est pas cochée, elle le devient pour les colonnes de tableThemes
+    # Find the location of the checkboxes and if it is not checked, it becomes checked for the colums in tableThemes
+    """
     def select_all_column(self, col):
-        # Fonctionnement du bouton de sélection de toutes les colonnes
         for row in range(1, self.tableThemes.rowCount()):
             cell_widget = self.tableThemes.cellWidget(row, col)
             if cell_widget:
@@ -481,8 +538,11 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                 if chk and not chk.isChecked():
                     chk.setChecked(True)
 
+    """
+    Inverse l'état des cases à cocher pour une colonne dans le tableau tableThemes (Bouton 'Inverser la sélection')
+    Toggles the state of the checkboxes for a column in the tableThemes table ('Invert selection' button)
+    """
     def invert_column(self, col):
-        # Fonctionnement du bouton d'inversion de la sélection pour une colonne
         for row in range(1, self.tableThemes.rowCount()):
             cell_widget = self.tableThemes.cellWidget(row, col)
             if cell_widget:
@@ -490,34 +550,27 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                 if chk:
                     chk.setChecked(not chk.isChecked())
 
+    """
+    Coche toutes les cases à cocher de la colonne "Afficher" (col 0) dans la table de gestion des thèmes (table_FilterAndSuppressThemes) : Bouton 'Tout sélectionner'
+    Checks all the checkboxes in the column 0 in the theme management table (table_FilterAndSuppressThemes) :  'Select All' button
+    """
     def select_all_themes_column(self):
-    # Coche toutes les cases de la colonne "Afficher" (colonne 0, à partir de la ligne 1)
         for row in range(1, self.table_FilterAndSuppressThemes.rowCount()):
             item = self.table_FilterAndSuppressThemes.item(row, 0)
             if item and item.flags() & QtCore.Qt.ItemIsUserCheckable:
                 item.setCheckState(QtCore.Qt.Checked)
 
+    """
+    Inverse l'état des cases à cocher pour une colonne dans le tableau table_FilterAndSuppressThemes (Bouton 'Inverser la sélection')
+    Toggles the state of the checkboxes for a column in the table_FilterAndSuppressThemes table ('Invert selection' button)
+    """
     def invert_themes_column(self):
-        # Inverse toutes les cases de la colonne "Afficher" (colonne 0, à partir de la ligne 1)
         for row in range(1, self.table_FilterAndSuppressThemes.rowCount()):
             item = self.table_FilterAndSuppressThemes.item(row, 0)
             if item and item.flags() & QtCore.Qt.ItemIsUserCheckable:
                 item.setCheckState(QtCore.Qt.Unchecked if item.checkState() == QtCore.Qt.Checked else QtCore.Qt.Checked)
 
-    def check_group_if_layers_in_check(self):
-        # Si un groupe a au moins une case de cocher, il doit être visible, explore récursivement les éventuels sous groupes pour les afficher aussi (NE FONCTIONNE PAS COMME ATTENDUE)
-        root = QgsProject.instance().layerTreeRoot()
-        def update_group(node):
-            if node.nodeType() == node.NodeGroup:
-                any_child_visible = False
-                for child in node.children():
-                    if child.nodeType() == child.NodeLayer and child.isVisible():
-                        any_child_visible = True
-                    elif child.nodeType() == child.NodeGroup and update_group(child):
-                        any_child_visible = True
-                node.setItemVisibilityChecked(any_child_visible)
-                return any_child_visible
-            elif node.nodeType() == node.NodeLayer:
-                return node.isVisible()
-            return False
-        update_group(root)
+"""
+LA FIN
+THE END
+"""
