@@ -84,7 +84,7 @@ Actuellement, il n'est pas possible de gérer les groupes de la même manière q
 
 ---
 
-<details>
+<details open>
 <summary><strong>🇬🇧 English</strong></summary>
 
 ## English
