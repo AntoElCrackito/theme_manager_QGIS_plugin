@@ -48,7 +48,7 @@ Initialement, ce plugin a été développé durant un stage de fin d'étude au s
 
 ### 📶 Installation
 
-#### Depuis QGIS (bientôt disponible)
+#### Depuis QGIS (https://plugins.qgis.org/plugins/theme_manager/) :
 
 1. Ouvrez QGIS
 2. Allez dans `Extensions` > `Installer/Gérer les extensions`
@@ -113,7 +113,7 @@ At first, this plugin was developed during an internship at the Service Départe
 
 ### 📶 Install
 
-#### From QGIS Plugins Manager (coming soon)
+#### From QGIS Plugins Manager (https://plugins.qgis.org/plugins/theme_manager/)
 
 1. Open QGIS
 2. Go `Plugins` > `Install/Manage plugins`
