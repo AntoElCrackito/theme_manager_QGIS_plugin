@@ -8,14 +8,16 @@
 
 - [🇫🇷 Français](#français)
   - [Description](#description)
-  - [Fonctionnalités principales](#fonctionnalités-principales)
-  - [Installation](#installation)
+  - [Fonctionnalités principales](#-fonctionnalités-principales)
+  - [Installation](#-installation)
+  - [Contact (FR)](#-contact-fr)
 - [🇬🇧 English](#english)
   - [Description](#description-1)
-  - [Main functionalities](#main-functionalities)
-  - [Install](#install)
+  - [Main functionalities](#-main-functionalities)
+  - [Install](#-install)
+  - [Contact (EN)](#-contact-en)
 
-- [Contact](#contact)
+
 
 ---
 
@@ -71,7 +73,7 @@ Initialement, ce plugin a été développé durant un stage de fin d'étude au s
      ```
 ---
 
-### 📧 Contact :
+### 📧 Contact (FR)
 Sentez-vous libre de me contacter à ce mail : theme.manager.qgis.plugin@gmail.com
 
 Au plaisir d'échanger avec vous !
@@ -136,7 +138,7 @@ At first, this plugin was developed during an internship at the Service Départe
      ```
 ---
 
-### 📧 Contact :
+### 📧 Contact (EN)
 Feel free to contact me at : theme.manager.qgis.plugin@gmail.com
 
 Happy to discuss further with you !
