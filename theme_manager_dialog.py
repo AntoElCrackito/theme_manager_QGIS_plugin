@@ -17,7 +17,7 @@ import os
 import datetime
 import platform
 import getpass
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets, QtCore
 from qgis.core import QgsProject, QgsMapThemeCollection, QgsLayerTree
@@ -801,7 +801,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         try:
             tree = ET.parse(file_path)
             root = tree.getroot()
-        except Exception:
+        except (ET.ParseError, OSError, ValueError):
             return None
 
         if root.tag != "theme_manager_export":
@@ -926,8 +926,8 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                 for line in metadata_file:
                     if line.startswith("version="):
                         return line.strip().split("=", 1)[1]
-        except Exception:
-            pass
+        except (OSError, UnicodeError):
+            return ""
         return ""
 
     """
