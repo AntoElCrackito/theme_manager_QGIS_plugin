@@ -74,11 +74,36 @@
          <widget class="QTableWidget" name="table_FilterAndSuppressThemes"/>
         </item>
         <item row="2" column="1">
-         <widget class="QPushButton" name="btnCreateNewTheme">
-          <property name="text">
-           <string>Créer un thème</string>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="layoutThemeActions">
+          <item>
+           <widget class="QPushButton" name="btnCreateNewTheme">
+            <property name="text">
+             <string>Créer un thème</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnExportThemes">
+            <property name="text">
+             <string>Exporter des thèmes</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnExportCurrentTheme">
+            <property name="text">
+             <string>Exporter le thème courant</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnImportTheme">
+            <property name="text">
+             <string>Importer un thème</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="label_2">

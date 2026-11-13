@@ -52,7 +52,7 @@ EXTRAS = metadata.txt icon.png
 
 EXTRA_DIRS =
 
-COMPILED_RESOURCE_FILES = resources.py
+COMPILED_RESOURCE_FILES =
 
 PEP8EXCLUDE=pydev,resources.py,conf.py,third_party,ui
 
@@ -85,11 +85,6 @@ default:
 	@echo your plugins and runs anywhere.
 	@echo You can install pb_tool using: pip install pb_tool
 	@echo See https://g-sherman.github.io/plugin_build_tool/ for info. 
-
-compile: $(COMPILED_RESOURCE_FILES)
-
-%.py : %.qrc $(RESOURCES_SRC)
-	pyrcc5 -o $*.py  $<
 
 %.qm : %.ts
 	$(LRELEASE) $<

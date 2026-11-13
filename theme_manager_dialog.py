@@ -14,9 +14,15 @@
 """
 
 import os
+import datetime
+import platform
+import getpass
+import xml.etree.ElementTree as ET
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets, QtCore
-from qgis.core import QgsProject, QgsMapThemeCollection
+from qgis.core import QgsProject, QgsMapThemeCollection, QgsLayerTree
+# NOUVEAU : QgsLayerTree permet de discriminer les groupes des couches
+# NOUVEAU: QgsLayerTree is used to distinguish groups from layers
 from qgis.PyQt.QtGui import QColor
 
 # Charge la classe et la base de l'interface utilisateur UI (fichier d'interface graphique) à partir du fichier QtDesigner
@@ -49,6 +55,12 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         # If the buttons present in the .ui, they're connected to their respective methods when the user clicks on them
         if hasattr(self, "btnCreateNewTheme"):
             self.btnCreateNewTheme.clicked.connect(self.create_new_theme)
+        if hasattr(self, "btnExportThemes"):
+            self.btnExportThemes.clicked.connect(self.export_themes)
+        if hasattr(self, "btnExportCurrentTheme"):
+            self.btnExportCurrentTheme.clicked.connect(self.export_current_theme)
+        if hasattr(self, "btnImportTheme"):
+            self.btnImportTheme.clicked.connect(self.import_theme)
         if hasattr(self, "btnApplyTheme"):
             self.btnApplyTheme.clicked.connect(self.apply_selected_theme)
         if hasattr(self, "table_FilterAndSuppressThemes"):
@@ -102,7 +114,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
                 item = self.table_FilterAndSuppressThemes.item(row, 0)
                 # Si la case est cochée, le thème est ajouté à la liste
                 # If the checkbox is checked, the theme is added to the list
-                if item and item.checkState() == QtCore.Qt.Checked:
+                if item and item.checkState() == QtCore.Qt.CheckState.Checked:
                     selected_themes.append(self.table_FilterAndSuppressThemes.item(row, 1).text())
             themes = selected_themes if selected_themes else all_themes
         # Si le tableau de filtre ne pouvait pas être chargée, tous les thèmes sont affichés
@@ -117,15 +129,19 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             # Parcourt l'arbre des couches, ajoute chaque groupe/couche à la liste items, parent_id permet de connaître la hiérarchie dans l'arbre des couches
             # Recursive function that runs through the layer tree and adds each layer and groups
             for child in node.children():
-                if child.nodeType() == child.NodeGroup:
+                # NOUVEAU : QgsLayerTree.isGroup / isLayer remplacent child.NodeGroup / NodeLayer qui n'existent plus dans QGIS4
+                # NOUVEAU: QgsLayerTree.isGroup / isLayer replace child.NodeGroup / NodeLayer that doesn't exist anymore in QGIS4
+                if QgsLayerTree.isGroup(child):
                     # Si la condition est True, c'est un groupe : son id, son nom et l'id du parent (sous-groupe) sont récupérés
                     # If the condition is True, the item is a group : its id, name and the id of the parent (sub-group) are collected
-                    group_id = child.name()
+                    # NOUVEAU : l'id d'un groupe est désormais son chemin complet (ex : "Groupe parent/Sous-groupe")
+                    # NOUVEAU: a group's id is now its full path
+                    group_id = f"{parent_id}/{child.name()}" if parent_id else child.name()
                     items.append((True, group_id, child.name(), parent_id))
                     add_items_rec(child, group_id)
                     # Récursif s'il y a des sous-groupes
                     # Recursive if it's a sub-group
-                elif child.nodeType() == child.NodeLayer:
+                elif QgsLayerTree.isLayer(child):
                     # False = c'est une couche : récupération de son id, son nom et son parent (groupe/sous-groupe)
                     # False = it's a layer : Its id, name and parent are collected (group/sub-group)
                     items.append((False, child.layerId(), child.name(), parent_id))
@@ -146,8 +162,10 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         self.tableThemes.setHorizontalHeaderLabels(["", self.tr("Groupe/Couche")] + themes)
         for col in [0, 1]:
             item = QtWidgets.QTableWidgetItem()
-            item.setFlags(QtCore.Qt.ItemIsEnabled)
-            item.setBackground(QtCore.Qt.gray)
+            item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
+            # NOUVEAU : QColor("gray") remplace Qt.GlobalColor.gray pour la compatibilité avec PyQt6
+            # NOUVEAU: QColor("gray") replaces Qt.GlobalColor.gray, for PyQt6 compatibility issues
+            item.setBackground(QColor("gray"))
             self.tableThemes.setItem(0, col, item)
 
         """
@@ -192,7 +210,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             # If it's a group, the checkbox isn't displayed (to develop)
             if is_group:
                 group_item = QtWidgets.QTableWidgetItem()
-                group_item.setFlags(QtCore.Qt.NoItemFlags)
+                group_item.setFlags(QtCore.Qt.ItemFlag.NoItemFlags)
                 group_item.setBackground(QColor("#f0f0f0"))
                 self.tableThemes.setItem(row + 1, 0, group_item)
             else:
@@ -228,25 +246,40 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             Adding a checkbox for each theme (layer/theme or theme/layer)
             """
             for col, theme in enumerate(themes, start=2):
-                # Si c'est un groupe, la cellule est grisée et désactivée
-                # If it's a group he box is displayed in grey and disabled
+                # Si c'est un groupe, la cellule est grisée
+                # If it's a group he box is displayed in grey
+                # NOUVEAU : la cellule du groupe reste grisée mais n'est plus désactivée
+                # NOUVEAU: the group cell stays grey but is no longer disabled
                 if is_group:
-                    group_item = QtWidgets.QTableWidgetItem()
-                    group_item.setFlags(QtCore.Qt.NoItemFlags)
-                    group_item.setBackground(QColor("#f0f0f0"))
-                    self.tableThemes.setItem(row + 1, col, group_item)
-                # Si c'est une couche, ajout d'une case à cocher pour chaque thème
-                # If it's a layer, adds a checkbox for each theme
+                    # NOUVEAU : La case est cochée si le chemin du groupe est dans la liste des groupes cochés du thème
+                    # NOUVEAU: The checkbox is checked if the group path is in the theme's checked groups list
+                    checked = item_id in theme_collection.mapThemeState(theme).checkedGroupNodes()
+                    chk = QtWidgets.QCheckBox()
+                    chk.setChecked(checked)
+                    chk.toggled.connect(partial(self.on_group_box_changed, item_id, theme))
+                    widget = QtWidgets.QWidget()
+                    # NOUVEAU : Fond gris limité à la cellule
+                    # NOUVEAU: Grey background limited to the cell
+                    widget.setObjectName("groupCell")
+                    widget.setStyleSheet("#groupCell { background-color: #f0f0f0; }")
+                    layout = QtWidgets.QHBoxLayout(widget)
+                    layout.addWidget(chk)
+                    layout.setAlignment(chk, QtCore.Qt.AlignmentFlag.AlignCenter) # Case à cocher au centre de la cellule / Checkbox centered in the cell 
+                    layout.setContentsMargins(0, 0, 0, 0)
+                    widget.setLayout(layout)
+                    self.tableThemes.setCellWidget(row + 1, col, widget)
+                # Si c'est une couche (car ce n'est pas un groupe) la case n'est pas grisée mais fonctionne pareil
+                # If it's a layer (bc it's not a group), the checkbox isn't grey but works the same
                 else:
                     layers_in_theme = theme_collection.mapThemeVisibleLayerIds(theme)
                     checked = item_id in layers_in_theme # La case est déjà cochée si la couche est dans le thème / The checkbox is already checked if the layer is in the theme 
                     chk = QtWidgets.QCheckBox()
                     chk.setChecked(checked)
-                    chk.stateChanged.connect(partial(self.on_box_changed, item_id, theme))
+                    chk.toggled.connect(partial(self.on_box_changed, item_id, theme))
                     widget = QtWidgets.QWidget()
                     layout = QtWidgets.QHBoxLayout(widget)
                     layout.addWidget(chk)
-                    layout.setAlignment(chk, QtCore.Qt.AlignCenter) # Case à cocher au centre de la cellule / Checkbox centered in the cell 
+                    layout.setAlignment(chk, QtCore.Qt.AlignmentFlag.AlignCenter) # Case à cocher au centre de la cellule / Checkbox centered in the cell 
                     layout.setContentsMargins(0, 0, 0, 0)
                     widget.setLayout(layout)
                     self.tableThemes.setCellWidget(row + 1, col, widget)
@@ -262,17 +295,15 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
     Méthode gérant le cochage décochage des cases dans le tableau. Elle met à jour le thème modifié et réapplique le thème courant pour constater les modifications si elles ont été effectuées sur celui-ci
     This method manages the checked or unchecked state of the cells int the table. It updates the modified theme and reload the theme in QGIS interface to display the modifications if they has been done on this one
     """
-    def on_box_changed(self, item_id, theme, state):
+    def on_box_changed(self, item_id, theme, checked):
         theme_collection = QgsProject.instance().mapThemeCollection()
         # Récupère l'état des thèmes depuis la collection des thèmes
         # Collects themes states from QGIS theme collection
         theme_state = theme_collection.mapThemeState(theme)
         root = QgsProject.instance().layerTreeRoot()
-        # Récupère la couche depuis son identifiant dans QGIS (c'est ce que je ne peux pas faire avec les groupes qui apparemment n'ont pas d'ID)
-        # Collects the layer from his QGIS project's ID (that is what I can't do with groups because it seems that they don't have IDs)
         layer = QgsProject.instance().mapLayer(item_id)
         if layer:
-            if state == QtCore.Qt.Checked: # Ajoute la couche comme étant visible dans le thème / If it's checked, the layer is added to the theme
+            if checked: # Ajoute la couche comme étant visible dans le thème / If it's checked, the layer is added to the theme
                 theme_state.removeLayerRecord(layer)
                 lr = QgsMapThemeCollection.MapThemeLayerRecord(layer)
                 lr.isVisible = True
@@ -287,6 +318,37 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
             self.last_modified_theme = theme
 
         if hasattr(self, "comboThemes"): # Le thème dans la combobox des thèmes est rechargé / The theme chosen in the comboxbox is reloaded
+            current_theme = self.comboThemes.currentText()
+            if current_theme:
+                theme_collection.applyTheme(current_theme, root, self.iface.layerTreeView().layerTreeModel())
+
+    """
+    NOUVEAU : Méthode gérant le cochage décochage des cases des groupes dans le tableau. Elle met à jour la liste des groupes cochés du thème modifié et réapplique le thème courant.
+    NOUVEAU: This method manages the checked or unchecked state of the group cells. It updates the list of checked groups of the modified theme and reloads the current theme.
+    """
+    def on_group_box_changed(self, group_path, theme, checked):
+        theme_collection = QgsProject.instance().mapThemeCollection()
+        # NOUVEAU : Récupère l'état du thème et où les groupes sont stockés (avec son chemin)
+        # NOUVEAU: Collects the theme state and where groups are stored (with its path)
+        theme_state = theme_collection.mapThemeState(theme)
+        root = QgsProject.instance().layerTreeRoot()
+        # NOUVEAU : Ajoute ou retire le chemin du groupe dans MapThemeState
+        # NOUVEAU: Adds or removes the group path in MapThemeState
+        nodes = set(theme_state.checkedGroupNodes())
+        if checked:
+            nodes.add(group_path)
+        else:
+            nodes.discard(group_path)
+        theme_state.setCheckedGroupNodes(nodes)
+        # NOUVEAU : Marque le thème comme contenant l'état des groupes (méthode absente de certaines versions de QGIS 3 en Python, d'où le hasattr)
+        # NOUVEAU: Flags the theme as holding group state (method missing from some QGIS 3 Python versions, hence the hasattr)
+        if hasattr(theme_state, "setHasCheckedStateInfo"):
+            theme_state.setHasCheckedStateInfo(True)
+        theme_collection.update(theme, theme_state)
+        self.last_modified_theme = theme
+        # NOUVEAU : Le thème est rechargé
+        # NOUVEAU: The theme is reloaded
+        if hasattr(self, "comboThemes"):
             current_theme = self.comboThemes.currentText()
             if current_theme:
                 theme_collection.applyTheme(current_theme, root, self.iface.layerTreeView().layerTreeModel())
@@ -341,20 +403,20 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         # The other cells from the first line aren't editable and displayed in grey
         for col in range(1, 4):
             item = QtWidgets.QTableWidgetItem("")
-            item.setFlags(QtCore.Qt.ItemIsEnabled)
+            item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
             self.table_FilterAndSuppressThemes.setItem(0, col, item)
 
         for row, theme in enumerate(themes):
             # Colonne 0 : Base à cocher pour afficher/masquer le thème dans la table de gestion des couches par thème
             # Column 0 : Display or hide a theme in the other table
             chk_item = QtWidgets.QTableWidgetItem()
-            chk_item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-            chk_item.setCheckState(QtCore.Qt.Checked)
+            chk_item.setFlags(QtCore.Qt.ItemFlag.ItemIsUserCheckable | QtCore.Qt.ItemFlag.ItemIsEnabled)
+            chk_item.setCheckState(QtCore.Qt.CheckState.Checked)
             self.table_FilterAndSuppressThemes.setItem(row +1, 0, chk_item)
             # Colonne 1 : Nom du thème
             # Column 1 : Theme's name
             name_item = QtWidgets.QTableWidgetItem(theme)
-            name_item.setFlags(QtCore.Qt.ItemIsEnabled)
+            name_item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled)
             self.table_FilterAndSuppressThemes.setItem(row+1, 1, name_item)
             # Colonne 2 : Bouton de suppression du thème
             # Column 2 : Delete theme button
@@ -381,7 +443,7 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         theme_collection = QgsProject.instance().mapThemeCollection()
         # Demande un nouveau nom à l'utilisateur via une boîte de dialogue
         # Asks the user to enter a new theme name (the former one is displayed in the question)
-        new_name, ok = QtWidgets.QInputDialog.getText(self, self.tr("Renommer le thème"), self.tr("Entrer un nouveau nom pour le thème « {old_name} » :").format(old_name=old_name), QtWidgets.QLineEdit.Normal, old_name)
+        new_name, ok = QtWidgets.QInputDialog.getText(self, self.tr("Renommer le thème"), self.tr("Entrer un nouveau nom pour le thème « {old_name} » :").format(old_name=old_name), QtWidgets.QLineEdit.EchoMode.Normal, old_name)
         # Si l'utilisateur quitte la fenêtre ou entre une valeur nulle la fonction est fermée (Aucune action réalisée)
         # If the user leaves the dialog box or sets a NULL value, the fonction is stopped (No action)
         if not ok or not new_name:
@@ -448,10 +510,10 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
         reply = QtWidgets.QMessageBox.question(
             self, self.tr("Suppression de thème"),
             self.tr("Êtes-vous sûr de vouloir supprimer le thème : « {theme_name} » ?").format(theme_name=theme_name),
-            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No)
         # Si l'utilisateur confirme son choix, le theme est supprimé
         # If the user confirms, the theme is removed
-        if reply == QtWidgets.QMessageBox.Yes:
+        if reply == QtWidgets.QMessageBox.StandardButton.Yes:
             theme_collection.removeMapTheme(theme_name)
             # Recharge les tableaux pour afficher le nouveau thème
             # Reloads the tables to display the new theme
@@ -557,8 +619,8 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
     def select_all_themes_column(self):
         for row in range(1, self.table_FilterAndSuppressThemes.rowCount()):
             item = self.table_FilterAndSuppressThemes.item(row, 0)
-            if item and item.flags() & QtCore.Qt.ItemIsUserCheckable:
-                item.setCheckState(QtCore.Qt.Checked)
+            if item and item.flags() & QtCore.Qt.ItemFlag.ItemIsUserCheckable:
+                item.setCheckState(QtCore.Qt.CheckState.Checked)
 
     """
     Inverse l'état des cases à cocher pour une colonne dans le tableau table_FilterAndSuppressThemes (Bouton 'Inverser la sélection')
@@ -567,8 +629,482 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
     def invert_themes_column(self):
         for row in range(1, self.table_FilterAndSuppressThemes.rowCount()):
             item = self.table_FilterAndSuppressThemes.item(row, 0)
-            if item and item.flags() & QtCore.Qt.ItemIsUserCheckable:
-                item.setCheckState(QtCore.Qt.Unchecked if item.checkState() == QtCore.Qt.Checked else QtCore.Qt.Checked)
+            if item and item.flags() & QtCore.Qt.ItemFlag.ItemIsUserCheckable:
+                item.setCheckState(QtCore.Qt.CheckState.Unchecked if item.checkState() == QtCore.Qt.CheckState.Checked else QtCore.Qt.CheckState.Checked)
+
+    """
+    Exporter plusieurs thèmes (format XML). Cette méthode ouvre une boîte de sélection des thèmes à exporter puis ouvre l'explorateur de fichier pour choisir l'emplacement du fichier. Elle écrit un fichier XML contenant les métadonnées (auteur, date, description) et la liste des couches visibles par thème.
+    Export several themes (XML format). This method opens a dialog to select themes to export, then opens the file browser to choose the file location. It writes an XML file containing metadata (author, date, description) and the list of visible layers by theme.
+    """
+    def export_themes(self):
+        theme_collection = QgsProject.instance().mapThemeCollection()
+        themes = list(theme_collection.mapThemes())
+        # S'il n'y a pas de thème dans le projet, impossible d'en exporter un
+        # If there is no theme in the project, it's impossible to export one
+        if not themes:
+            QtWidgets.QMessageBox.information(self, self.tr("Absence de thème dans le projet"), self.tr("Votre projet ne contient pas de thème. Créez-en un depuis le menu QGIS ou dans le premier volet du plugin."))
+            return
+
+        # Boîte de dialogue de sélection des thèmes à exporter (avec possibilité d'en sélectionner plusieurs)
+        # Dialog box to select themes to export (with the possibility to select several ones)
+        selected = self._select_themes_dialog(themes, self.tr("Sélectionner les thèmes à exporter"), multi=True)
+        if not selected:
+            QtWidgets.QMessageBox.information(self, self.tr("Exporter des thèmes"), self.tr("Aucun thème sélectionné."))
+            return
+
+        # Ouverture de l'explorateur de fichier
+        # File browser opening
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            self.tr("Exporter des thèmes"),
+            "",
+            self.tr("Fichier XML de thèmes (*.xml)")
+        )
+        if not file_path:
+            return
+        if not file_path.lower().endswith(".xml"):
+            file_path += ".xml"
+
+        metadata = self._collect_metadata_dialog()
+        if metadata is None:
+            return
+
+        # Si l'écriture du fichier d'export échoue, affiche un message d'erreur
+        # If writing the export file fails, an error message is displayed
+        if not self._write_themes_to_xml(file_path, selected, metadata):
+            QtWidgets.QMessageBox.warning(self, self.tr("Erreur d'export"), self.tr("Impossible d'écrire le fichier d'export."))
+            return
+
+        # Sinon, affiche un message de validation
+        # Otherwise, a confirmation dialog is displayed
+        QtWidgets.QMessageBox.information(self, self.tr("Exporter des thèmes"), self.tr("L'export des thèmes a réussi."))
+
+    """
+    Exporter le thème courant. Cette méthode exporte le thème sélectionné dans la combobox (ou le dernier modifié) vers un fichier XML.
+    Export the current theme. This method exports the theme selected in the combobox (or the last modified one) to an XML file.
+    """
+    def export_current_theme(self):
+        current_theme = None
+        if hasattr(self, "comboThemes"):
+            current_theme = self.comboThemes.currentText()
+        if not current_theme:
+            current_theme = self.last_modified_theme
+        # Sécurité : Si aucun thème n'est sélectionnée ou dernièrement modifié, message d'erreur
+        # Safety check : If no theme is selected or has been modified, an error message is displayed
+        if not current_theme:
+            QtWidgets.QMessageBox.information(self, self.tr("Exporter le thème courant"), self.tr("Aucun thème courant n'est sélectionné."))
+            return
+
+        # Fonctionnement similaire à la fonction précédente (sans la phase de sélection du thème à exporter)
+        # Similar operation to the previous function (without the theme selection phase)
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            self.tr("Exporter le thème courant"),
+            "",
+            self.tr("Fichier XML de thèmes (*.xml)")
+        )
+        if not file_path:
+            return
+        if not file_path.lower().endswith(".xml"):
+            file_path += ".xml"
+
+        metadata = self._collect_metadata_dialog()
+        if metadata is None:
+            return
+
+        if not self._write_themes_to_xml(file_path, [current_theme], metadata):
+            QtWidgets.QMessageBox.warning(self, self.tr("Erreur d'export"), self.tr("Impossible d'écrire le fichier d'export."))
+            return
+
+        QtWidgets.QMessageBox.information(self, self.tr("Exporter le thème courant"), self.tr("L'export du thème a réussi."))
+
+    """
+    Importer un thème depuis un fichier XML. L'utilisateur choisit un fichier, puis un thème si le fichier en contient plusieurs. En cas de conflit de nom, il peut remplacer ou renommer le thème importé.
+    Import a theme from an XML file. The user chooses a XML file, then a theme if the file contains several ones. In case of name conflict, the user can choose to replace or rename the imported theme.
+    """
+    def import_theme(self):
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            self.tr("Importer un thème"),
+            "",
+            self.tr("Fichier XML de thèmes (*.xml)")
+        )
+        if not file_path:
+            return
+
+        # Fonction qui analyse le fichier. Elle affiche un message d'erreur si le fichier est corrompu. Sinon, elle affiche métadonnées et thèmes contenus dans le fichier.
+        # Function that parses the file. It displays an error message if the file is corrupted. Otherwise, it displays metadata and themes contained in the file.
+        parsed = self._parse_theme_xml(file_path)
+        if parsed is None:
+            QtWidgets.QMessageBox.warning(self, self.tr("Fichier invalide"), self.tr("Le fichier sélectionné n'est pas un export Theme Manager valide."))
+            return
+
+        metadata, themes = parsed
+        if not themes:
+            QtWidgets.QMessageBox.warning(self, self.tr("Fichier invalide"), self.tr("Le fichier sélectionné n'est pas un export Theme Manager valide."))
+            return
+
+        if not self._confirm_import_metadata(metadata):
+            return
+
+        # Si le fichier contient différents thèmes, l'utilisateur peut sélectionner celui qu'il souhaite importer.
+        # If the file contains several themes, the user can select the one he wants to import.
+        if len(themes) == 1:
+            theme_name, theme_layers = themes[0]
+        else:
+            selected_theme = self._select_themes_dialog([t[0] for t in themes], self.tr("Choisir un thème à importer"), multi=False)
+            if not selected_theme:
+                return
+            theme_name = selected_theme[0]
+            theme_layers = next((t[1] for t in themes if t[0] == theme_name), [])
+
+        final_theme_name = self._resolve_theme_name_conflict(theme_name)
+        if not final_theme_name:
+            return
+
+        mapped_layers, missing_layers = self._map_layers_for_import(theme_layers)
+
+        # Le thème importé est ajouté au projet QGIS avec les couches correspondantes. Si des couches présentes dans le thème importé ne sont pas présentes dans le projet (chemin, source... différents), l'utilisateur a la possibilité de les réattribuer manuellement. Ces dernières sont ajoutées au nouveau thème. Sinon, elles sont ignorées et un message d'avertissement liste les couches manquantes.
+        # The imported theme is added to the QGIS project with the corresponding layers. If some layers from the imported theme are not present in the project (different path, source...), the user has the possibility to manually reassign them. These layers are added to the new theme. Otherwise, they are ignored and a warning message lists the missing layers.
+        theme_collection = QgsProject.instance().mapThemeCollection()
+        root = QgsProject.instance().layerTreeRoot()
+        layerTreeModel = self.iface.layerTreeView().layerTreeModel()
+        theme_state = QgsMapThemeCollection.createThemeFromCurrentState(root, layerTreeModel)
+        for layer in QgsProject.instance().mapLayers().values():
+            theme_state.removeLayerRecord(layer)
+        for layer in mapped_layers:
+            lr = QgsMapThemeCollection.MapThemeLayerRecord(layer)
+            lr.isVisible = True
+            theme_state.addLayerRecord(lr)
+
+        if final_theme_name in theme_collection.mapThemes():
+            theme_collection.removeMapTheme(final_theme_name)
+        theme_collection.insert(final_theme_name, theme_state)
+
+        self.fill_theme_filter_table()
+        self.fill_theme_table()
+
+        if missing_layers:
+            QtWidgets.QMessageBox.warning(
+                self,
+                self.tr("Couches manquantes"),
+                self.tr("Certaines couches n'ont pas été retrouvées et seront ignorées :\n{layers}").format(layers="\n".join(missing_layers))
+            )
+
+    """
+    Lit un fichier XML d'export et retourne les métadonnées + les thèmes. Retourne None si le fichier est invalide.
+    Extracts metadata and themes from an export XML file. Returns None if the file is invalid.
+    """
+    # Les informations sur les thèmes sont retournées : nom du thème, couches associées.
+    # The information about themes is returned : theme name, associated layers.
+    def _parse_theme_xml(self, file_path):
+        try:
+            tree = ET.parse(file_path)
+            root = tree.getroot()
+        except Exception:
+            return None
+
+        if root.tag != "theme_manager_export":
+            return None
+
+        metadata_elem = root.find("metadata")
+        metadata = {
+            "author": metadata_elem.get("author", "") if metadata_elem is not None else "",
+            "os": metadata_elem.get("os", "") if metadata_elem is not None else "",
+            "description": metadata_elem.get("description", "") if metadata_elem is not None else "",
+            "export_date": metadata_elem.get("export_date", "") if metadata_elem is not None else "",
+            "plugin_version": metadata_elem.get("plugin_version", "") if metadata_elem is not None else "",
+        }
+
+        mapthemes_elem = root.find("mapthemes")
+        if mapthemes_elem is None:
+            return None
+        
+        themes = []
+        for maptheme in mapthemes_elem.findall("maptheme"):
+            theme_name = maptheme.get("name", "").strip()
+            if not theme_name:
+                continue
+            layers = []
+            for layer_elem in maptheme.findall("layer"):
+                layers.append({
+                    "name": layer_elem.get("name", ""),
+                    "source": layer_elem.get("source", ""),
+                    "provider": layer_elem.get("provider", ""),
+                    "visible": layer_elem.get("visible", "1"),
+                })
+            themes.append((theme_name, layers))
+
+        return metadata, themes
+
+    """
+    Écrit un fichier XML d'export avec métadonnées et couches visibles par thème.
+    Writes an export XML file with metadata and visible layers by theme.
+    """
+    # Une liste de noms de thèmes à exporter est instanciée en paramètre avec ses métadonnées. L'utilisateur choisi l'emplacement d'export du fichier XML.
+    # A list of theme to export is created with its metadata. The user chooses the export location of the file.
+    def _write_themes_to_xml(self, file_path, theme_names, metadata):
+        try:
+            theme_collection = QgsProject.instance().mapThemeCollection()
+            root = ET.Element("theme_manager_export")
+            # Collecte les métadonnées pour les écrire dans le fichier XML (auteur, OS, description, date d'export, version du plugin)
+            # Collects metadata to write in the XML file (author, OS, description, export date, plugin version)
+            ET.SubElement(root, "metadata", attrib={
+                "author": metadata.get("author", ""),
+                "os": metadata.get("os", ""),
+                "description": metadata.get("description", ""),
+                "export_date": metadata.get("export_date", ""),
+                "plugin_version": metadata.get("plugin_version", ""),
+            })
+            # Collecte les thèmes à exporter avec les couches visibles associées.
+            # Collects themes to export with associated visible layers.
+            mapthemes_elem = ET.SubElement(root, "mapthemes")
+            for theme_name in theme_names:
+                maptheme_elem = ET.SubElement(mapthemes_elem, "maptheme", attrib={"name": theme_name})
+                visible_ids = theme_collection.mapThemeVisibleLayerIds(theme_name)
+                for layer_id in visible_ids:
+                    layer = QgsProject.instance().mapLayer(layer_id)
+                    if layer is None:
+                        continue
+                    ET.SubElement(maptheme_elem, "layer", attrib={
+                        "name": layer.name(),
+                        "source": layer.source(),
+                        "provider": layer.providerType(),
+                        "visible": "1",
+                    })
+
+            tree = ET.ElementTree(root)
+            tree.write(file_path, encoding="utf-8", xml_declaration=True)
+            return True
+        except Exception:
+            return False
+
+    """
+    Boîte de dialogue pour la saisie des métadonnées d'export (auteur, OS, description). Ajoute aussi la date et la version du plugin automatiquement.
+    Dialog for entering export metadata. Date and plugin version are added automatically.
+    """
+    def _collect_metadata_dialog(self):
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle(self.tr("Métadonnées du thème"))
+
+        layout = QtWidgets.QFormLayout(dialog)
+        author_edit = QtWidgets.QLineEdit(dialog)
+        os_edit = QtWidgets.QLineEdit(dialog)
+        desc_edit = QtWidgets.QTextEdit(dialog)
+        author_edit.setText(getpass.getuser())
+        os_edit.setText(platform.platform())
+
+        layout.addRow(self.tr("Auteur"), author_edit)
+        layout.addRow(self.tr("Système d'exploitation"), os_edit)
+        layout.addRow(self.tr("Description"), desc_edit)
+
+        buttons = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.StandardButton.Ok | QtWidgets.QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addRow(buttons)
+
+        if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted:
+            return None
+
+        metadata = {
+            "author": author_edit.text().strip(),
+            "os": os_edit.text().strip(),
+            "description": desc_edit.toPlainText().strip(),
+            "export_date": datetime.datetime.now().isoformat(timespec="seconds"),
+            "plugin_version": self._get_plugin_version(),
+        }
+        return metadata
+
+    """
+    Récupère la version du plugin dans metadata.txt
+    Collects the plugin version from metadata.txt
+    """
+    def _get_plugin_version(self):
+        try:
+            metadata_path = os.path.join(os.path.dirname(__file__), "metadata.txt")
+            with open(metadata_path, "r", encoding="utf-8") as metadata_file:
+                for line in metadata_file:
+                    if line.startswith("version="):
+                        return line.strip().split("=", 1)[1]
+        except Exception:
+            pass
+        return ""
+
+    """
+    Affiche un résumé des métadonnées et demande la confirmation d'import.
+    Displays a summary of metadata and asks for import confirmation.
+    """
+    def _confirm_import_metadata(self, metadata):
+        author = metadata.get("author", "") or self.tr("Non renseigné")
+        os_value = metadata.get("os", "") or self.tr("Non renseigné")
+        description = metadata.get("description", "") or self.tr("Non renseigné")
+        export_date = metadata.get("export_date", "") or self.tr("Non renseigné")
+        plugin_version = metadata.get("plugin_version", "") or self.tr("Non renseigné")
+
+        message = self.tr("Auteur : {author}\nOS : {os}\nDescription : {description}\nDate : {date}\nVersion plugin : {version}\n\nVoulez-vous importer ce thème ?").format(
+            author=author,
+            os=os_value,
+            description=description,
+            date=export_date,
+            version=plugin_version
+        )
+        reply = QtWidgets.QMessageBox.question(self, self.tr("Confirmer l'import du thème"), message, QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No)
+        return reply == QtWidgets.QMessageBox.StandardButton.Yes
+
+    """
+    Boîte de sélection d'un ou plusieurs thèmes.
+    Dialog for selecting one or more themes.
+    """
+    def _select_themes_dialog(self, themes, title, multi=False):
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle(title)
+        layout = QtWidgets.QVBoxLayout(dialog)
+        info_label = QtWidgets.QLabel(self.tr("Choisissez un ou plusieurs thèmes à exporter."))
+        if not multi:
+            info_label.setText(self.tr("Choisissez un thème."))
+        layout.addWidget(info_label)
+
+        list_widget = QtWidgets.QListWidget(dialog)
+        list_widget.addItems(themes)
+        list_widget.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.MultiSelection if multi else QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
+        layout.addWidget(list_widget)
+
+        buttons = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.StandardButton.Ok | QtWidgets.QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+
+        if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted:
+            return []
+
+        selected_items = list_widget.selectedItems()
+        return [item.text() for item in selected_items]
+
+    """
+    Gère le conflit de nom lors de l'import : remplacer ou renommer le thème importé.
+    Handles name conflict during import: replace or rename the imported theme.
+    """
+    def _resolve_theme_name_conflict(self, theme_name):
+        theme_collection = QgsProject.instance().mapThemeCollection()
+        if theme_name not in theme_collection.mapThemes():
+            return theme_name
+
+        message_box = QtWidgets.QMessageBox(self)
+        message_box.setWindowTitle(self.tr("Conflit de nom"))
+        message_box.setText(self.tr("Un thème nommé « {theme} » existe déjà. Que voulez-vous faire ?").format(theme=theme_name))
+        btn_replace = message_box.addButton(self.tr("Remplacer"), QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+        btn_rename = message_box.addButton(self.tr("Renommer"), QtWidgets.QMessageBox.ButtonRole.ActionRole)
+        btn_cancel = message_box.addButton(QtWidgets.QMessageBox.StandardButton.Cancel)
+        message_box.exec()
+        clicked = message_box.clickedButton()
+
+        if clicked == btn_replace:
+            return theme_name
+        if clicked == btn_rename:
+            while True:
+                new_name, ok = QtWidgets.QInputDialog.getText(self, self.tr("Renommer le thème"), self.tr("Entrer un nouveau nom pour le thème « {old_name} » :").format(old_name=theme_name), QtWidgets.QLineEdit.EchoMode.Normal, theme_name)
+                if not ok:
+                    return None
+                new_name = new_name.strip()
+                if not new_name:
+                    QtWidgets.QMessageBox.warning(self, self.tr("Nom manquant"), self.tr("Veuillez saisir un nom de thème non vide."))
+                    continue
+                if new_name in theme_collection.mapThemes():
+                    QtWidgets.QMessageBox.warning(self, self.tr("Thème existant"), self.tr("Ce nom de thème existe déjà."))
+                    continue
+                return new_name
+        return None
+
+    """
+    Fonction principale (appelle _match_layer et _map_layers_for_import) : Remappe les noms des couches du thème importé vers les couches du projet courant. Stratégie : source+provider, puis nom, puis selon le choix de l'utilisateur qui peut ignorer la couche.
+    Fonction principale (calls _match_layer and _map_layers_for_import) : Reattributes the names of the layers from the imported themes to the existing layers in the current projet. Mapping strategy : source+provider, then name, else user choice.
+    """
+    def _map_layers_for_import(self, theme_layers):
+        project_layers = list(QgsProject.instance().mapLayers().values())
+        index_by_source_provider = {}
+        index_by_name = {}
+        for layer in project_layers:
+            key = (layer.providerType(), layer.source())
+            index_by_source_provider.setdefault(key, []).append(layer)
+            index_by_name.setdefault(layer.name(), []).append(layer)
+
+        mapped_layers = []
+        missing_layers = []
+        for layer_info in theme_layers:
+            if layer_info.get("visible", "1") != "1":
+                continue
+            match = self._match_layer(layer_info, index_by_source_provider, index_by_name, project_layers)
+            if match is None:
+                missing_layers.append(layer_info.get("name", "(sans nom)"))
+                continue
+            mapped_layers.append(match)
+
+        return mapped_layers, missing_layers
+
+    """
+    Cherche à faire correspondre une couche du thème importé avec une couche du projet. Si elle matche une seule fois elle est automatique ajoutée, si elle est matchée plsuieurs fois l'utilisateur choisit manuellement et si elle n'est pas matchée automatiquement l'utilisateur la choisira manuellement parmi toutes les couches du projet.
+    Tries to match a layer from the imported theme with a layer from the project. If it matches only once, it is automatically added, if it matches several times the user chooses manually and if it does not match automatically the user will choose manually among all the layers of the project.
+    """
+    def _match_layer(self, layer_info, index_by_source_provider, index_by_name, project_layers):
+        name = layer_info.get("name", "")
+        source = layer_info.get("source", "")
+        provider = layer_info.get("provider", "")
+
+        if provider and source:
+            candidates = index_by_source_provider.get((provider, source), [])
+            if len(candidates) == 1:
+                return candidates[0]
+            if len(candidates) > 1:
+                return self._choose_layer_from_candidates(candidates, self.tr("Plusieurs couches correspondent à la source. Choisissez la bonne couche."), name)
+
+        if name:
+            candidates = index_by_name.get(name, [])
+            if len(candidates) == 1:
+                return candidates[0]
+            if len(candidates) > 1:
+                return self._choose_layer_from_candidates(candidates, self.tr("Plusieurs couches correspondent au nom. Choisissez la bonne couche."), name)
+
+        return self._choose_layer_from_all(project_layers, name)
+
+    """
+    Laisse l'utilisateur choisir une couche parmi des candidats (ou ignorer) quand la couche matche avec plusieurs occurences du projet.
+    The user chooses a layer among candidates or ignore if several layers from the projet match the imported layer.
+    """
+    def _choose_layer_from_candidates(self, candidates, message, layer_name=""):
+        display_name = layer_name if layer_name else self.tr("(sans nom)")
+        full_message = self.tr("Couche importée : « {layer_name} »\n{message}").format(layer_name=display_name, message=message)
+        items = [self._layer_display_text(layer) for layer in candidates]
+        items.insert(0, self.tr("Ignorer cette couche"))
+        choice, ok = QtWidgets.QInputDialog.getItem(self, self.tr("Associer la couche"), full_message, items, 0, False)
+        if not ok or choice == self.tr("Ignorer cette couche"):
+            return None
+        index = items.index(choice) - 1
+        return candidates[index] if 0 <= index < len(candidates) else None
+
+    """
+    Si aucun match automatique n'est trouvé, propose toutes les couches du projet à l'utilisateur pour qu'il fasse le mapping manuellement.
+    If no automatic match is found, displays all project layers to the user for manual mapping.
+    """
+    def _choose_layer_from_all(self, project_layers, layer_name):
+        if not project_layers:
+            QtWidgets.QMessageBox.warning(self, self.tr("Aucune couche disponible"), self.tr("Aucune couche de remplacement disponible."))
+            return None
+
+        message = self.tr("La couche « {layer_name} » n'a pas été retrouvée. Sélectionnez une couche de remplacement ou choisissez Ignorer.").format(layer_name=layer_name or self.tr("(sans nom)"))
+        items = [self._layer_display_text(layer) for layer in project_layers]
+        items.insert(0, self.tr("Ignorer cette couche"))
+        choice, ok = QtWidgets.QInputDialog.getItem(self, self.tr("Associer la couche manquante"), message, items, 0, False)
+        if not ok or choice == self.tr("Ignorer cette couche"):
+            return None
+        index = items.index(choice) - 1
+        return project_layers[index] if 0 <= index < len(project_layers) else None
+
+    """
+    Formate le nom de la couche et son fournisseur pour l'afficher dans les dialogs.
+    Formats the layer name and provider for display in dialogs.
+    """
+    def _layer_display_text(self, layer):
+        return "{name} ({provider})".format(name=layer.name(), provider=layer.providerType())
 
 """
 LA FIN

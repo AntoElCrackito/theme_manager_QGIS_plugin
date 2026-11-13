@@ -25,7 +25,6 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
-from .resources import *
 from .theme_manager_dialog import ThemeManagerDialog
 import os.path
 
@@ -91,10 +90,10 @@ class ThemeManager:
         return action
 
     def initGui(self):
-        icon_path = ':/plugins/theme_manager/icon.png'
+        icon_path = os.path.join(self.plugin_dir, 'icon.png')
         self.add_action(
             icon_path,
-            text=self.tr(u''),
+            text=self.tr(u'Theme Manager'),
             callback=self.run,
             parent=self.iface.mainWindow())
         self.first_start = True
@@ -107,6 +106,6 @@ class ThemeManager:
     def run(self):
         self.dlg = ThemeManagerDialog(self.iface)
         self.dlg.show()
-        result = self.dlg.exec_()
+        result = self.dlg.exec()
         if result:
             pass
