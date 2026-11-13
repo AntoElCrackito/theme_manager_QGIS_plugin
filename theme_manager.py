@@ -30,7 +30,6 @@ import os.path
 
 class ThemeManager:
     def __init__(self, iface):
-        from qgis.PyQt.QtCore import QTranslator, QCoreApplication, QSettings
         import os
 
         self.iface = iface
