@@ -1,6 +1,6 @@
 # Theme Manager
 
-[![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)]([https://plugins.qgis.org/](https://plugins.qgis.org/plugins/theme_manager/))
+[![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/theme_manager/)
 [![License](https://img.shields.io/badge/license-GPLv3-blue)](https://www.gnu.org/licenses/quick-guide-gplv3.en.html)
 [![Version](https://img.shields.io/badge/version-1.0.0-orange)](https://github.com/AntoElCrackito/theme_manager_QGIS_plugin)
 
@@ -30,7 +30,7 @@
 
 **Theme Manager** est un plugin développé pour QGIS permettant de visualiser la répartition des affichages des couches par thème dans un projet QGIS. Il permet également de créer ou supprimer des thèmes.
 
-Initialement, ce plugin a été développé durant un stage de fin d'étude au sein du Service Départemental d'Incendie et de Secours du Gard (SDIS30) sur demande du service SIG. En effet, ce dernier met a disposition de nombreux projets sur son portail OpenSIS30 (Portail webmapping Lizmap) et doit gérer des thèmes dans lesquels de nombreuses couches doivent être affichées, toutefois, QGIS ne permet pas de bénéficier d'une interface graphique pour consulter quelles sont les couches présentent dans chaque thème. Avant que ce plugin soit développé, il était nécessaire d'appliquer chaque thème au projet et s'assurer de l'apparition de chaque couche une par une. Ce plugin permet de gérer cela avec une interface graphique et un système de case à cocher.
+Initialement, ce plugin a été développé durant un stage de fin d'étude au sein du Service Départemental d'Incendie et de Secours du Gard (SDIS30) sur demande du service SIG. En effet, ce dernier met à disposition de nombreux projets sur son portail OpenSIS30 (Portail webmapping Lizmap) et doit gérer des thèmes dans lesquels de nombreuses couches doivent être affichées. Toutefois, QGIS ne permet pas de bénéficier d'une interface graphique pour consulter quelles sont les couches présentes dans chaque thème. Avant que ce plugin soit développé, il était nécessaire d'appliquer chaque thème au projet et de s'assurer de l'apparition de chaque couche une par une. Ce plugin permet de gérer cela avec une interface graphique et un système de case à cocher.
 
 ---
 

@@ -1,6 +1,7 @@
 [general]
 name=Theme Manager
-qgisMinimumVersion=3.0
+qgisMinimumVersion=3.22
+qgisMaximumVersion=4.99
 author=Antoine BOYER
 email=theme.manager.qgis.plugin@gmail.com
 description=This plugin stands to be a theme manager. It allows you to select the layers you want to set up in the different themes in your project as a checklist, showing up all themes at once.
@@ -12,7 +13,7 @@ homepage=https://github.com/AntoElCrackito/theme_manager_QGIS_plugin
 tracker=https://github.com/AntoElCrackito/theme_manager_QGIS_plugin/issues
 repository=https://github.com/AntoElCrackito/theme_manager_QGIS_plugin
 
-version=1.0
+version=1.1
 
 hasProcessingProvider=no
 icon=icon.png
