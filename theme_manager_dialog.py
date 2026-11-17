@@ -17,7 +17,7 @@ import os
 import datetime
 import platform
 import getpass
-from defusedxml import ElementTree as ET
+from qgis.PyQt.QtXml import QDomDocument
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets, QtCore
 from qgis.core import QgsProject, QgsMapThemeCollection, QgsLayerTree
@@ -799,41 +799,51 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
     # The information about themes is returned : theme name, associated layers.
     def _parse_theme_xml(self, file_path):
         try:
-            tree = ET.parse(file_path)
-            root = tree.getroot()
-        except (ET.ParseError, OSError, ValueError):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                xml_content = f.read()
+        except Exception:
             return None
 
-        if root.tag != "theme_manager_export":
+        doc = QDomDocument()
+        res = doc.setContent(xml_content)
+        success = res[0] if isinstance(res, tuple) else res
+        if not success:
             return None
 
-        metadata_elem = root.find("metadata")
+        root = doc.documentElement()
+        if root.tagName() != "theme_manager_export":
+            return None
+
+        metadata_elem = root.firstChildElement("metadata")
         metadata = {
-            "author": metadata_elem.get("author", "") if metadata_elem is not None else "",
-            "os": metadata_elem.get("os", "") if metadata_elem is not None else "",
-            "description": metadata_elem.get("description", "") if metadata_elem is not None else "",
-            "export_date": metadata_elem.get("export_date", "") if metadata_elem is not None else "",
-            "plugin_version": metadata_elem.get("plugin_version", "") if metadata_elem is not None else "",
+            "author": metadata_elem.attribute("author", "") if not metadata_elem.isNull() else "",
+            "os": metadata_elem.attribute("os", "") if not metadata_elem.isNull() else "",
+            "description": metadata_elem.attribute("description", "") if not metadata_elem.isNull() else "",
+            "export_date": metadata_elem.attribute("export_date", "") if not metadata_elem.isNull() else "",
+            "plugin_version": metadata_elem.attribute("plugin_version", "") if not metadata_elem.isNull() else "",
         }
 
-        mapthemes_elem = root.find("mapthemes")
-        if mapthemes_elem is None:
+        mapthemes_elem = root.firstChildElement("mapthemes")
+        if mapthemes_elem.isNull():
             return None
-        
+
         themes = []
-        for maptheme in mapthemes_elem.findall("maptheme"):
-            theme_name = maptheme.get("name", "").strip()
-            if not theme_name:
-                continue
-            layers = []
-            for layer_elem in maptheme.findall("layer"):
-                layers.append({
-                    "name": layer_elem.get("name", ""),
-                    "source": layer_elem.get("source", ""),
-                    "provider": layer_elem.get("provider", ""),
-                    "visible": layer_elem.get("visible", "1"),
-                })
-            themes.append((theme_name, layers))
+        maptheme_elem = mapthemes_elem.firstChildElement("maptheme")
+        while not maptheme_elem.isNull():
+            theme_name = maptheme_elem.attribute("name", "").strip()
+            if theme_name:
+                layers = []
+                layer_elem = maptheme_elem.firstChildElement("layer")
+                while not layer_elem.isNull():
+                    layers.append({
+                        "name": layer_elem.attribute("name", ""),
+                        "source": layer_elem.attribute("source", ""),
+                        "provider": layer_elem.attribute("provider", ""),
+                        "visible": layer_elem.attribute("visible", "1"),
+                    })
+                    layer_elem = layer_elem.nextSiblingElement("layer")
+                themes.append((theme_name, layers))
+            maptheme_elem = maptheme_elem.nextSiblingElement("maptheme")
 
         return metadata, themes
 
@@ -846,35 +856,44 @@ class ThemeManagerDialog(QtWidgets.QDialog, FORM_CLASS):
     def _write_themes_to_xml(self, file_path, theme_names, metadata):
         try:
             theme_collection = QgsProject.instance().mapThemeCollection()
-            root = ET.Element("theme_manager_export")
-            # Collecte les métadonnées pour les écrire dans le fichier XML (auteur, OS, description, date d'export, version du plugin)
-            # Collects metadata to write in the XML file (author, OS, description, export date, plugin version)
-            ET.SubElement(root, "metadata", attrib={
-                "author": metadata.get("author", ""),
-                "os": metadata.get("os", ""),
-                "description": metadata.get("description", ""),
-                "export_date": metadata.get("export_date", ""),
-                "plugin_version": metadata.get("plugin_version", ""),
-            })
-            # Collecte les thèmes à exporter avec les couches visibles associées.
-            # Collects themes to export with associated visible layers.
-            mapthemes_elem = ET.SubElement(root, "mapthemes")
+
+            doc = QDomDocument("theme_manager_export")
+            instruction = doc.createProcessingInstruction("xml", 'version="1.0" encoding="UTF-8"')
+            doc.appendChild(instruction)
+
+            root = doc.createElement("theme_manager_export")
+            doc.appendChild(root)
+
+            metadata_elem = doc.createElement("metadata")
+            metadata_elem.setAttribute("author", metadata.get("author", ""))
+            metadata_elem.setAttribute("os", metadata.get("os", ""))
+            metadata_elem.setAttribute("description", metadata.get("description", ""))
+            metadata_elem.setAttribute("export_date", metadata.get("export_date", ""))
+            metadata_elem.setAttribute("plugin_version", metadata.get("plugin_version", ""))
+            root.appendChild(metadata_elem)
+
+            mapthemes_elem = doc.createElement("mapthemes")
+            root.appendChild(mapthemes_elem)
+
             for theme_name in theme_names:
-                maptheme_elem = ET.SubElement(mapthemes_elem, "maptheme", attrib={"name": theme_name})
+                maptheme_elem = doc.createElement("maptheme")
+                maptheme_elem.setAttribute("name", theme_name)
                 visible_ids = theme_collection.mapThemeVisibleLayerIds(theme_name)
                 for layer_id in visible_ids:
                     layer = QgsProject.instance().mapLayer(layer_id)
                     if layer is None:
                         continue
-                    ET.SubElement(maptheme_elem, "layer", attrib={
-                        "name": layer.name(),
-                        "source": layer.source(),
-                        "provider": layer.providerType(),
-                        "visible": "1",
-                    })
+                    layer_elem = doc.createElement("layer")
+                    layer_elem.setAttribute("name", layer.name())
+                    layer_elem.setAttribute("source", layer.source())
+                    layer_elem.setAttribute("provider", layer.providerType())
+                    layer_elem.setAttribute("visible", "1")
+                    maptheme_elem.appendChild(layer_elem)
+                mapthemes_elem.appendChild(maptheme_elem)
 
-            tree = ET.ElementTree(root)
-            tree.write(file_path, encoding="utf-8", xml_declaration=True)
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(doc.toString(4))
+
             return True
         except Exception:
             return False
