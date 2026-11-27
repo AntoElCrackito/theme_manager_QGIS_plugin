@@ -2,7 +2,7 @@
 
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/theme_manager/)
 [![License](https://img.shields.io/badge/license-GPLv3-blue)](https://www.gnu.org/licenses/quick-guide-gplv3.en.html)
-[![Version](https://img.shields.io/badge/version-1.0.0-orange)](https://github.com/AntoElCrackito/theme_manager_QGIS_plugin)
+[![Version](https://img.shields.io/badge/version-2.0-orange)](https://github.com/AntoElCrackito/theme_manager_QGIS_plugin)
 
 ## 📑 Table des matières / Table of content
 
@@ -36,13 +36,15 @@ Initialement, ce plugin a été développé durant un stage de fin d'étude au s
 
 ### 👨‍💻 Fonctionnalités principales
 
-- Créer un thème.
-- Supprimer un thème.
-- Filtrer la liste des thèmes affichés dans la gestion des couches par thèmes.
-- Choisir les couches à afficher par thème.
-- Bénéficier d'un sélecteur de thème intégré à la fenêtre du plugin.
-- ➕ Interface graphique simple et intuitive.
-- ➕ Compatible avec QGIS 3.x.
+- Liste des thèmes filtrable, triée naturellement (« Thème 2 » avant « Thème 10 »), adaptée aux projets contenant des dizaines de thèmes.
+- Arbre des couches identique au panneau **Couches** de QGIS : cases à cocher pour les couches **et les groupes**, couches grisées sous un groupe décoché, Ctrl+clic pour basculer toute une branche, Espace pour basculer la sélection.
+- Sélection de plusieurs thèmes (Ctrl/Maj + clic) : une colonne par thème pour les comparer et les modifier côte à côte, filtre « Différences entre thèmes ».
+- Créer, dupliquer, renommer (F2), remplacer par la carte actuelle, supprimer (Suppr) des thèmes ; appliquer un thème par double-clic.
+- Style de couche propre à chaque thème (menu contextuel).
+- **Réparation des thèmes** : quand un groupe est renommé ou déplacé, les thèmes sont mis à jour automatiquement ; quand une couche est supprimée puis rajoutée, le plugin propose de la remettre dans ses thèmes (bouton « Réparer les thèmes » pour les cas restants).
+- Export / import XML de plusieurs thèmes (format compatible avec les versions précédentes), un seul dialogue d'association des couches, mots de passe retirés des sources exportées.
+- Fenêtre non modale : QGIS reste utilisable pendant que le gestionnaire est ouvert.
+- Compatible QGIS 3.22+ et QGIS 4 (Qt 6).
 
 ---
 
@@ -78,10 +80,6 @@ Sentez-vous libre de me contacter à ce mail : theme.manager.qgis.plugin@gmail.c
 
 Au plaisir d'échanger avec vous !
 
-### 🦺 Information importante
-
-Actuellement, il n'est pas possible de gérer les groupes de la même manière que les couches. Je n'ai pas réussi à identifier dans la documentation de l'API QGIS un identifiant ou une variable permettant d'agir sur le statut d’un groupe. J'avais précédemment réussi à le faire, mais une fois le groupe réactivé, les couches apparaissaient grisées et invisibles (comme si une échelle de rendu non satisfaite était définie). Une issue sera prochainement déposée sur la page GitHub de QGIS pour tenter de résoudre ce problème. Si vous trouvez une solution, n'hésitez pas à la partager !
-
 </details>
 
 ---
@@ -101,13 +99,19 @@ At first, this plugin was developed during an internship at the Service Départe
 
 ### 👨‍💻 Main functionalities
 
-- Create a theme.
-- Delete a theme.
-- Filter the list of themes displayed in the layer management by theme section.
-- Select the layers to display by theme.
-- Provide a built-in theme selector within the plugin window.
-- ➕ Simple and intuitive graphical interface.
-- ➕ QGIS 3.x compatible.
+- Filterable theme list with natural sorting ("Theme 2" before "Theme 10"), designed for projects with dozens of themes.
+- Layer tree drawn like the QGIS **Layers** panel: check boxes for layers **and groups**, layers greyed out under an unchecked group, Ctrl+click to switch a whole branch, Space to toggle the selection.
+- Select several themes (Ctrl/Shift + click): one column per theme to compare and edit them side by side, "Differences between themes" filter.
+- Create, duplicate, rename (F2), replace with the current map, delete (Del) themes; double-click to apply a theme.
+- Per-theme layer style (context menu).
+- **Theme repair**: when a group is renamed or moved, themes are updated automatically; when a layer is removed and added again, the plugin offers to put it back into its themes ("Repair themes" button for the remaining cases).
+- XML export / import of several themes (format compatible with previous versions), a single layer mapping dialog, passwords removed from exported data sources.
+- Non-modal window: QGIS stays usable while the manager is open.
+- QGIS 3.22+ and QGIS 4 (Qt 6) compatible.
+
+### 🌐 Translations
+
+User visible strings are in English (context `ThemeManager`). After changing them, run `python scripts/update_translations.py` to update `i18n/*.ts` and compile the `*.qm` files (no Qt tools required).
 
 ---
 
@@ -142,9 +146,5 @@ At first, this plugin was developed during an internship at the Service Départe
 Feel free to contact me at : theme.manager.qgis.plugin@gmail.com
 
 Happy to discuss further with you !
-
-### 🦺 Important information
-
-At the moment, it's not possible to manage groups in the same way as individual layers. I haven't been able to find an ID or variable in the QGIS API documentation that allows control over a group's visibility status. I previously managed to toggle group visibility, but when reactivated, the layers appeared greyed out and invisible — as if an unmet scale range was applied. An issue will soon be submitted to the QGIS GitHub page to try and resolve this. If you find a solution, feel free to share it!
 
 </details>

@@ -4,7 +4,7 @@ qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 author=Antoine BOYER
 email=theme.manager.qgis.plugin@gmail.com
-description=This plugin stands to be a theme manager. It allows you to select the layers you want to set up in the different themes in your project as a checklist, showing up all themes at once.
+description=Manage the layers of many map themes at once: a layer tree like the Layers panel, side by side comparison of themes, import/export and automatic repair of themes after layers or groups are renamed, moved or removed.
 about=Managing several themes within a single QGIS project can sometimes be complex. This plugin provides you a user-friendly graphical interface to efficiently manage the layers you wish to display in each theme of your QGIS project.
 category=Plugins
 tags=python, themes, layers, cartography, geovisualisation, layer tree
@@ -13,8 +13,14 @@ homepage=https://github.com/AntoElCrackito/theme_manager_QGIS_plugin
 tracker=https://github.com/AntoElCrackito/theme_manager_QGIS_plugin/issues
 repository=https://github.com/AntoElCrackito/theme_manager_QGIS_plugin
 
-version=1.1
+version=2.0
 
+changelog=2.0
+    - New interface built for projects with dozens of themes: filterable theme list, layer tree drawn like the Layers panel, several themes compared side by side
+    - Groups can be checked/unchecked per theme (Ctrl+click switches a whole branch), layer style per theme
+    - Themes are repaired automatically when a group is renamed or moved; removed layers are remembered and can be restored in their themes
+    - Export/import of several themes at once, one mapping dialog instead of one popup per layer, passwords removed from exported data sources
+    - Non-modal window, Russian and French translations
 hasProcessingProvider=no
 icon=icon.png
 experimental=False

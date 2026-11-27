@@ -38,15 +38,17 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	theme_manager.py theme_manager_dialog.py
+	theme_manager.py theme_manager_dialog.py theme_dialogs.py \
+	theme_guard.py theme_model.py theme_xml.py utils.py
 
 PLUGINNAME = theme_manager
 
 PY_FILES = \
 	__init__.py \
-	theme_manager.py theme_manager_dialog.py
+	theme_manager.py theme_manager_dialog.py theme_dialogs.py \
+	theme_guard.py theme_model.py theme_xml.py utils.py
 
-UI_FILES = theme_manager_dialog_base.ui
+UI_FILES =
 
 EXTRAS = metadata.txt icon.png
 
